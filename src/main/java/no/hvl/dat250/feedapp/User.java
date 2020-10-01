@@ -20,7 +20,6 @@ public class User {
 	private Long id;
 	private String username;
 	private String password;
-	private Boolean isAdmin;
 	
 	@OneToMany(mappedBy = "createdBy")
 	private List<Poll> polls;
@@ -28,11 +27,17 @@ public class User {
 	@OneToMany(mappedBy = "voter", fetch = FetchType.LAZY)
 	private List<Vote> votes;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "role")
 	private Role role;
 	
 	public User() {}
+
+	public User(String username, String password, Role role) {
+		this.username = username;
+		this.password = password;
+		this.role = role;
+	}
 
 	public Long getId() {
 		return id;
@@ -58,14 +63,6 @@ public class User {
 		this.password = password;
 	}
 
-	public Boolean getIsAdmin() {
-		return isAdmin;
-	}
-
-	public void setIsAdmin(Boolean isAdmin) {
-		this.isAdmin = isAdmin;
-	}
-
 	public List<Poll> getPolls() {
 		return polls;
 	}
@@ -84,8 +81,7 @@ public class User {
 
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", username=" + username + ", password=" + password + ", isAdmin=" + isAdmin
-				+ ", polls=" + polls + ", votes=" + votes + "]";
+		return "User [id=" + id + ", username=" + username + ", password=" + password + ", polls=" + polls + ", votes=" + votes + ", role=" + role + "]";
 	}
 	
 

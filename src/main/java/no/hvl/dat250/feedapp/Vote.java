@@ -33,6 +33,13 @@ public class Vote {
 	
 	public Vote() {}
 
+	public Vote(Integer result, User voter, Poll poll) {
+		super();
+		this.result = result;
+		this.voter = voter;
+		this.poll = poll;
+	}
+
 	public Long getId() {
 		return id;
 	}

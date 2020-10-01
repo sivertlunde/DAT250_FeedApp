@@ -1,5 +1,7 @@
 package no.hvl.dat250.feedapp;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,11 +14,16 @@ public class Role {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	
-	@OneToMany(mappedBy = "role")
 	private String role;
 	
+	@OneToMany(mappedBy = "role")
+	private List<User> users;
+	
 	public Role() {}
+	
+	public Role(String role) {
+		this.role = role;
+	}
 
 	public Long getId() {
 		return id;

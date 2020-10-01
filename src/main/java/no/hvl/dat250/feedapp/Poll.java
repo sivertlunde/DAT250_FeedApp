@@ -39,6 +39,15 @@ public class Poll {
 	
 	public Poll() {}
 
+	public Poll(String title, String description, String green, String red, Boolean isPublic, User createdBy) {
+		this.title = title;
+		this.description = description;
+		this.green = green;
+		this.red = red;
+		this.isPublic = isPublic;
+		this.createdBy = createdBy;
+	}
+
 	public Long getId() {
 		return id;
 	}
