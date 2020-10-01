@@ -42,3 +42,4 @@ hs_err_pid*
 # intellij files
 /.idea
 *.iml
+src/main/resources/application.properties
