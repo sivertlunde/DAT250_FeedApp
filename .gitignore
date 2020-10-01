@@ -2,7 +2,7 @@
 *.class
 
 # XML files
-*.xml
+**/persistence.xml
 
 # From spring gitignore
 target/
