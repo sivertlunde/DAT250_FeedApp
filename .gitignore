@@ -4,6 +4,9 @@
 # XML files
 **/persistence.xml
 
+# Derby
+derbyDB/
+
 # From spring gitignore
 target/
 !.mvn/wrapper/maven-wrapper.jar
