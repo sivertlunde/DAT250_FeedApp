@@ -1,6 +1,5 @@
 package no.hvl.dat250.feedapp;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -74,7 +73,7 @@ public class Vote {
 
 	@Override
 	public String toString() {
-		return "Vote [id=" + id + ", result=" + result + ", voter=" + voter + ", poll=" + poll + "]";
+		return "Vote [id=" + id + ", result=" + result + "]";
 	}
 
 }

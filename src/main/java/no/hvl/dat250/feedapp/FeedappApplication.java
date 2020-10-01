@@ -26,30 +26,26 @@ public class FeedappApplication {
 			User user2 = new User("username2", "password2", null);
 			Poll poll1 = new Poll("First poll", "To test the stuff", "It works", "It doesn't work", true, user1);
 			Vote vote1 = new Vote(1, user2, poll1);
+			Vote vote2 = new Vote(1, user1, poll1);
 			
-			rr.save(admin);
-			rr.save(registeredUser);
-			ur.save(user1);
-			ur.save(user2);
-			pr.save(poll1);
-			vr.save(vote1);
+//			rr.save(admin);
+//			rr.save(registeredUser);
+//			ur.save(user1);
+//			ur.save(user2);
+//			pr.save(poll1);
+//			vr.save(vote1);
+//			vr.save(vote2);
 
-			// fetch all customers
-			log.info("Users found with findAll():");
+			// fetch all polls
+			log.info("Polls found with findAll():");
 			log.info("-------------------------------");
-			for (User user : ur.findAll()) {
-				log.info(user.getUsername());
+			for (Poll poll : pr.findAll()) {
+				log.info(poll.toString());
+				log.info("With votes:");
+				for (Vote vote : vr.findByPoll(poll)) {
+					log.info(vote.toString());
+				}
 			}
-			log.info("");
-
-			// fetch user by username
-			log.info("User found with findByUsername('username1'):");
-			log.info("--------------------------------------------");
-			User found = ur.findByUsername("username1");
-			log.info(found.getUsername() + " " + found.getPassword());
-			// for (Customer bauer : repository.findByLastName("Bauer")) {
-			// log.info(bauer.toString());
-			// }
 			log.info("");
 		};
 	}

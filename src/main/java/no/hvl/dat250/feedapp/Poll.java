@@ -131,7 +131,6 @@ public class Poll {
 	@Override
 	public String toString() {
 		return "Poll [id=" + id + ", title=" + title + ", description=" + description + ", green=" + green + ", red="
-				+ red + ", isPublic=" + isPublic + ", startDate=" + startDate + ", endDate=" + endDate + ", createdBy="
-				+ createdBy + ", votes=" + votes + "]";
+				+ red + ", isPublic=" + isPublic + ", startDate=" + startDate + ", endDate=" + endDate + "]";
 	}
 }
