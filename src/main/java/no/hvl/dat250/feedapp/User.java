@@ -7,6 +7,9 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 @Entity(name = "UserTable")
@@ -24,6 +27,10 @@ public class User {
 	
 	@OneToMany(mappedBy = "voter", fetch = FetchType.LAZY)
 	private List<Vote> votes;
+	
+	@ManyToOne
+	@JoinColumn(name = "role")
+	private Role role;
 	
 	public User() {}
 
