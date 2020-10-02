@@ -61,7 +61,7 @@ public class VoteController {
 	}
 
 	@PutMapping("/votes/{id}")
-	public ResponseEntity<Vote> updateVote(@PathVariable("id") long id, @RequestBody Vote vote) {
+	public ResponseEntity<Vote> updateVote(@PathVariable("id") Long id, @RequestBody Vote vote) {
 		Optional<Vote> voteData = voteRepository.findById(id);
 
 		if (voteData.isPresent()) {
@@ -74,7 +74,7 @@ public class VoteController {
 	}
 
 	@DeleteMapping("/votes/{id}")
-	public ResponseEntity<HttpStatus> deleteVote(@PathVariable("id") long id) {
+	public ResponseEntity<HttpStatus> deleteVote(@PathVariable("id") Long id) {
 		try {
 			voteRepository.deleteById(id);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
