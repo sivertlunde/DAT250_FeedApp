@@ -6,23 +6,33 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import no.hvl.dat250.feedapp.model.Role;
 import no.hvl.dat250.feedapp.model.User;
+import no.hvl.dat250.feedapp.repository.RoleRepository;
 import no.hvl.dat250.feedapp.repository.UserRepository;
 
+@CrossOrigin(origins = "http://localhost:8080")
 @RestController
 public class UserController {
 
 	@Autowired
 	UserRepository userRepository;
+	
+	@Autowired
+	RoleRepository rolerRepository;
 
 	@GetMapping("/users")
 	public ResponseEntity<List<User>> getAllUsers() {
@@ -64,17 +74,25 @@ public class UserController {
 		}
 	}
 
-	@PostMapping("/users")
-	public ResponseEntity<User> createUser(@RequestBody User user) {
+	@PostMapping(value = "/users", consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<User> createUser(@RequestBody User user, @RequestParam(required = false) Long roleId) {
 		try {
-			User newUser = userRepository.save(new User(user.getUsername(), user.getPassword(), user.getRole()));
-			return new ResponseEntity<>(newUser, HttpStatus.CREATED);
+			User newUser = new User(user.getUsername(), user.getPassword());
+			if (roleId != null) {
+				Optional<Role> role = rolerRepository.findById(roleId);
+				if (role.isPresent()) {
+					newUser.setRole(role.get());
+				}
+			}
+			User savedUser = userRepository.save(newUser);
+			return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@PutMapping("/users/{id}")
+	//@RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<User> updateUser(@PathVariable("id") Long id, @RequestBody User user) {
 		Optional<User> userData = userRepository.findById(id);
 

@@ -37,10 +37,9 @@ public class User {
 	
 	public User() {}
 
-	public User(String username, String password, Role role) {
+	public User(String username, String password) {
 		this.username = username;
 		this.password = password;
-		this.role = role;
 	}
 
 	public Long getId() {

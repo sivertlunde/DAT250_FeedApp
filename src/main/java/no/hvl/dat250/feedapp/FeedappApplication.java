@@ -31,19 +31,19 @@ public class FeedappApplication {
 			// save a few entities
 			Role admin = new Role("Admin");
 			Role registeredUser = new Role("Registered user");
-			User user1 = new User("username1", "password1", null);
-			User user2 = new User("username2", "password2", null);
+			User user1 = new User("username1", "password1");
+			User user2 = new User("username2", "password2");
 			Poll poll1 = new Poll("First poll", "To test the stuff", "It works", "It doesn't work", true, user1);
 			Vote vote1 = new Vote(1, user2, poll1);
 			Vote vote2 = new Vote(1, user1, poll1);
 			
-			rr.save(admin);
-			rr.save(registeredUser);
-			ur.save(user1);
-			ur.save(user2);
-			pr.save(poll1);
-			vr.save(vote1);
-			vr.save(vote2);
+//			rr.save(admin);
+//			rr.save(registeredUser);
+//			ur.save(user1);
+//			ur.save(user2);
+//			pr.save(poll1);
+//			vr.save(vote1);
+//			vr.save(vote2);
 
 			// fetch all polls
 			log.info("Polls found with findAll():");
