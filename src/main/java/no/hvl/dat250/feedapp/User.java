@@ -11,6 +11,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity(name = "UserTable")
 public class User {
 	
@@ -20,9 +23,11 @@ public class User {
 	private String username;
 	private String password;
 	
-	@OneToMany(mappedBy = "createdBy")
+	@JsonManagedReference
+	@OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
 	private List<Poll> polls;
 	
+	@JsonManagedReference
 	@OneToMany(mappedBy = "voter", fetch = FetchType.LAZY)
 	private List<Vote> votes;
 	
@@ -76,6 +81,14 @@ public class User {
 
 	public void setVotes(List<Vote> votes) {
 		this.votes = votes;
+	}
+
+	public Role getRole() {
+		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
 	}
 
 	@Override

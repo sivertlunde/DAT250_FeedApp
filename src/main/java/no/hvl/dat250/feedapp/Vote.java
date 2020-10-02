@@ -8,6 +8,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 public class Vote {
 	
@@ -16,18 +18,14 @@ public class Vote {
 	private Long id; 
 	private Integer result;
 	
+	@JsonBackReference
 	@ManyToOne
-	@JoinTable(
-			name = "user_votes",
-			joinColumns = @JoinColumn(name = "vote_fk"),
-			inverseJoinColumns = @JoinColumn(name = "user_fk"))
+	@JoinColumn(name = "user_id")
 	private User voter;
 	
+	@JsonBackReference
 	@ManyToOne
-	@JoinTable(
-			name = "poll_votes",
-			joinColumns = @JoinColumn(name = "vote_fk"),
-			inverseJoinColumns = @JoinColumn(name = "poll_fk"))
+	@JoinColumn(name = "poll_id")
 	private Poll poll;
 	
 	public Vote() {}
