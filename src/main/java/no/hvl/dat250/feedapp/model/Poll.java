@@ -1,4 +1,4 @@
-package no.hvl.dat250.feedapp;
+package no.hvl.dat250.feedapp.model;
 
 import java.util.Date;
 import java.util.List;

@@ -7,6 +7,15 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import no.hvl.dat250.feedapp.model.Poll;
+import no.hvl.dat250.feedapp.model.Role;
+import no.hvl.dat250.feedapp.model.User;
+import no.hvl.dat250.feedapp.model.Vote;
+import no.hvl.dat250.feedapp.repository.PollRepository;
+import no.hvl.dat250.feedapp.repository.RoleRepository;
+import no.hvl.dat250.feedapp.repository.UserRepository;
+import no.hvl.dat250.feedapp.repository.VoteRepository;
+
 @SpringBootApplication
 public class FeedappApplication {
 

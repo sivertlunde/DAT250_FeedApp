@@ -1,4 +1,4 @@
-package no.hvl.dat250.feedapp;
+package no.hvl.dat250.feedapp.controller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import no.hvl.dat250.feedapp.model.Role;
+import no.hvl.dat250.feedapp.repository.RoleRepository;
 
 @CrossOrigin(origins = "http://localhost:8080")
 @RestController

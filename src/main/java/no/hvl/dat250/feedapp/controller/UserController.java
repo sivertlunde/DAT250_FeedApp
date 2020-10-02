@@ -1,4 +1,4 @@
-package no.hvl.dat250.feedapp;
+package no.hvl.dat250.feedapp.controller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import no.hvl.dat250.feedapp.model.User;
+import no.hvl.dat250.feedapp.repository.UserRepository;
 
 @RestController
 public class UserController {
