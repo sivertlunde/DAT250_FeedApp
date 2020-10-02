@@ -28,13 +28,13 @@ public class FeedappApplication {
 			Vote vote1 = new Vote(1, user2, poll1);
 			Vote vote2 = new Vote(1, user1, poll1);
 			
-//			rr.save(admin);
-//			rr.save(registeredUser);
-//			ur.save(user1);
-//			ur.save(user2);
-//			pr.save(poll1);
-//			vr.save(vote1);
-//			vr.save(vote2);
+			rr.save(admin);
+			rr.save(registeredUser);
+			ur.save(user1);
+			ur.save(user2);
+			pr.save(poll1);
+			vr.save(vote1);
+			vr.save(vote2);
 
 			// fetch all polls
 			log.info("Polls found with findAll():");
