@@ -16,13 +16,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import no.hvl.dat250.feedapp.model.Poll;
+import no.hvl.dat250.feedapp.model.User;
 import no.hvl.dat250.feedapp.model.Vote;
+import no.hvl.dat250.feedapp.repository.PollRepository;
+import no.hvl.dat250.feedapp.repository.UserRepository;
 import no.hvl.dat250.feedapp.repository.VoteRepository;
 
 @RestController
 public class VoteController {
 	@Autowired
 	VoteRepository voteRepository;
+	@Autowired
+	UserRepository userRepository;
+	@Autowired
+	PollRepository pollRepository;
 
 	@GetMapping("/votes")
 	public ResponseEntity<List<Vote>> getAllVotes(@RequestParam(required = false) String title) {
@@ -53,9 +61,30 @@ public class VoteController {
 	}
 
 	@PostMapping("/votes")
-	public ResponseEntity<Vote> createVote(@RequestBody Vote vote) {
+	public ResponseEntity<Vote> createVote(@RequestBody Vote vote, @RequestParam(required = false) Long voterId,
+			@RequestParam(required = true) Long pollId) {
 		try {
-			Vote _vote = voteRepository.save(new Vote(vote.getResult(), vote.getVoter(), vote.getPoll()));
+			Vote newVote = new Vote(vote.getResult(), null, null);
+			if (voterId != null) {
+				Optional<User> voterById = userRepository.findById(voterId);
+				if (voterById.isPresent()) {
+					newVote.setVoter(voterById.get());
+				} else {
+					return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				}
+			}
+
+			if (pollId != null) {
+				Optional<Poll> pollById = pollRepository.findById(pollId);
+				if (pollById.isPresent()) {
+					newVote.setPoll(pollById.get());					
+				} else {
+					return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				}
+			} else {
+				return new ResponseEntity<>(null, HttpStatus.NOT_ACCEPTABLE);
+			}
+			Vote _vote = voteRepository.save(newVote);
 			return new ResponseEntity<>(_vote, HttpStatus.CREATED);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
