@@ -26,10 +26,10 @@ import no.hvl.dat250.feedapp.repository.UserRepository;
 public class PollController {
 	
 	@Autowired
-	PollRepository pollrepository;
+	PollRepository pollRepository;
 	
 	@Autowired
-	UserRepository userrepository;
+	UserRepository userRepository;
 
 	@GetMapping("/polls")
 	public ResponseEntity<List<Poll>> getAllPolls(@RequestParam(required=false)String title) {
@@ -37,9 +37,9 @@ public class PollController {
 			List<Poll> polls = new ArrayList<Poll>();
 			
 			if(title==null) {
-				pollrepository.findAll().forEach(polls::add);
+				pollRepository.findAll().forEach(polls::add);
 			}else {
-				pollrepository.findByTitleContaining(title).forEach(polls::add);
+				pollRepository.findByTitleContaining(title).forEach(polls::add);
 			}
 			
 			if(polls.isEmpty()) {
@@ -54,7 +54,7 @@ public class PollController {
 	
 	@GetMapping("/polls/{id}")
 	  public ResponseEntity<Poll> getPollById(@PathVariable("id") long id) {
-	    Optional<Poll> pollData = pollrepository.findById(id);
+	    Optional<Poll> pollData = pollRepository.findById(id);
 
 	    if (pollData.isPresent()) {
 	      return new ResponseEntity<>(pollData.get(), HttpStatus.OK);
@@ -70,10 +70,10 @@ public class PollController {
 	    try {
 	      Poll newPoll = new Poll(poll.getTitle(), poll.getDescription(), poll.getGreen(), poll.getRed(), poll.getIsPublic(), null);
 	      if(userId != null) {
-	    	  Optional<User> user = userrepository.findById(userId);
+	    	  Optional<User> user = userRepository.findById(userId);
 	    	  if(user.isPresent()) {
 	    		  newPoll.setCreatedBy(user.get());
-	    		  Poll savedPoll = pollrepository.save(newPoll);
+	    		  Poll savedPoll = pollRepository.save(newPoll);
 	    		  return new ResponseEntity<>(savedPoll, HttpStatus.CREATED);
 	    	  }else {
 	    		  return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -89,7 +89,7 @@ public class PollController {
 	
 	@PutMapping("/polls/{id}")
 	  public ResponseEntity<Poll> updatePoll(@PathVariable("id") long id, @RequestBody Poll poll) {
-	    Optional<Poll> pollData = pollrepository.findById(id);
+	    Optional<Poll> pollData = pollRepository.findById(id);
 
 	    if (pollData.isPresent()) {
 	      Poll _poll = pollData.get();
@@ -99,7 +99,7 @@ public class PollController {
 	      _poll.setRed(poll.getRed());
 	      _poll.setIsPublic(poll.getIsPublic());
 	      _poll.setCreatedBy(poll.getCreatedBy());
-	      return new ResponseEntity<>(pollrepository.save(_poll), HttpStatus.OK);
+	      return new ResponseEntity<>(pollRepository.save(_poll), HttpStatus.OK);
 	    } else {
 	      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	    }
@@ -108,7 +108,7 @@ public class PollController {
 	 @DeleteMapping("/polls/{id}")
 	  public ResponseEntity<HttpStatus> deletePoll(@PathVariable("id") long id) {
 	    try {
-	      pollrepository.deleteById(id);
+	      pollRepository.deleteById(id);
 	      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	    } catch (Exception e) {
 	      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -118,7 +118,7 @@ public class PollController {
 	 @DeleteMapping("/polls")
 	  public ResponseEntity<HttpStatus> deleteAllPolls() {
 	    try {
-	      pollrepository.deleteAll();
+	      pollRepository.deleteAll();
 	      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	    } catch (Exception e) {
 	      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
