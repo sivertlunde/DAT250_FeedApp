@@ -5,11 +5,16 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+@JsonIdentityInfo(
+		  generator = ObjectIdGenerators.PropertyGenerator.class, 
+		  property = "id")
 @Entity
 public class Vote {
 	
@@ -18,14 +23,16 @@ public class Vote {
 	private Long id; 
 	private Integer result;
 	
-	@JsonBackReference
+	
 	@ManyToOne
 	@JoinColumn(name = "user_id")
+	@JsonIgnoreProperties(value = "votes")
 	private User voter;
 	
-	@JsonBackReference
+	
 	@ManyToOne
 	@JoinColumn(name = "poll_id")
+	@JsonIgnoreProperties(value = "votes")
 	private Poll poll;
 	
 	public Vote() {}

@@ -12,8 +12,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+@JsonIdentityInfo(
+		  generator = ObjectIdGenerators.PropertyGenerator.class, 
+		  property = "id")
 @Entity(name = "UserTable")
 public class User {
 	
@@ -23,12 +29,14 @@ public class User {
 	private String username;
 	private String password;
 	
-	@JsonManagedReference
+	
 	@OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
+	@JsonIgnoreProperties(value = "createdBy")
 	private List<Poll> polls;
 	
-	@JsonManagedReference
+	
 	@OneToMany(mappedBy = "voter", fetch = FetchType.LAZY)
+	@JsonIgnoreProperties(value = "voter")
 	private List<Vote> votes;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
