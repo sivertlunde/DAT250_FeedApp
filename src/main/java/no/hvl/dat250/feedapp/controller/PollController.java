@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import no.hvl.dat250.feedapp.model.Poll;
+import no.hvl.dat250.feedapp.model.User;
 import no.hvl.dat250.feedapp.repository.PollRepository;
+import no.hvl.dat250.feedapp.repository.UserRepository;
 
 
 @RestController
@@ -25,6 +27,7 @@ public class PollController {
 	
 	@Autowired
 	PollRepository pollrepository;
+	UserRepository userrepository;
 
 	@GetMapping("/polls")
 	public ResponseEntity<List<Poll>> getAllPolls(@RequestParam(required=false)String title) {
@@ -61,19 +64,23 @@ public class PollController {
 	//@RequestMapping(value = "/polls", method = RequestMethod.POST, 
 			//produces = "charset=utf-8; application/json")
 	//@ResponseBody
-	  public ResponseEntity<Poll> createPoll(@RequestBody Poll poll) {
+	  public ResponseEntity<Poll> createPoll(@RequestBody Poll poll, @RequestParam(required=true)Long userId) {
 	    try {
-	      Poll _poll = pollrepository
-	          .save(new Poll(
-	        		  poll.getTitle(),
-	        		  poll.getDescription(),
-	        		  poll.getGreen(),
-	        		  poll.getRed(),
-	        		  poll.getIsPublic(),
-	        		  poll.getCreatedBy()
-	        		  ));
-	      return new ResponseEntity<>(_poll, HttpStatus.CREATED);
+	      Poll newPoll = new Poll(poll.getTitle(), poll.getDescription(), poll.getGreen(), poll.getRed(), poll.getIsPublic(), null);
+	      if(userId != null) {
+	    	  Optional<User> user = userrepository.findById(userId);
+	    	  if(user.isPresent()) {
+	    		  newPoll.setCreatedBy(user.get());
+	    		  Poll savedPoll = pollrepository.save(newPoll);
+	    		  return new ResponseEntity<>(savedPoll, HttpStatus.CREATED);
+	    	  }else {
+	    		  return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+	    	  }
+	    	  
+	      }
+	      return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 	    } catch (Exception e) {
+	    	e.printStackTrace();
 	      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
 	  }
