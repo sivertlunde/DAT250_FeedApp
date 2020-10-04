@@ -27,6 +27,8 @@ public class PollController {
 	
 	@Autowired
 	PollRepository pollrepository;
+	
+	@Autowired
 	UserRepository userrepository;
 
 	@GetMapping("/polls")

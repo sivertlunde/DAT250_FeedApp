@@ -32,7 +32,7 @@ public class UserController {
 	UserRepository userRepository;
 	
 	@Autowired
-	RoleRepository rolerRepository;
+	RoleRepository roleRepository;
 
 	@GetMapping("/users")
 	public ResponseEntity<List<User>> getAllUsers() {
@@ -75,11 +75,11 @@ public class UserController {
 	}
 
 	@PostMapping(value = "/users", consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<User> createUser(@RequestBody User user, @RequestParam(required = false) Long roleId) {
+	public ResponseEntity<User> createUser(@RequestBody User user, @RequestParam(required = true) Long roleId) {
 		try {
 			User newUser = new User(user.getUsername(), user.getPassword());
 			if (roleId != null) {
-				Optional<Role> role = rolerRepository.findById(roleId);
+				Optional<Role> role = roleRepository.findById(roleId);
 				if (role.isPresent()) {
 					newUser.setRole(role.get());
 				}
@@ -93,13 +93,23 @@ public class UserController {
 
 	@PutMapping("/users/{id}")
 	//@RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<User> updateUser(@PathVariable("id") Long id, @RequestBody User user) {
+	public ResponseEntity<User> updateUser(@PathVariable("id") Long id, @RequestBody User user, @RequestParam(required = false) Long roleId) {
 		Optional<User> userData = userRepository.findById(id);
 
 		if (userData.isPresent()) {
 			User updatedUser = userData.get();
-			updatedUser.setUsername(user.getUsername());
-			updatedUser.setRole(user.getRole());
+			if (user.getUsername() != null) {
+				updatedUser.setUsername(user.getUsername());
+			}
+			if (user.getPassword() != null) {
+				updatedUser.setPassword(user.getPassword());
+			}
+			if (roleId != null) {
+				Optional<Role> role = roleRepository.findById(roleId);
+				if (role.isPresent()) {
+					updatedUser.setRole(role.get());
+				}
+			}
 			return new ResponseEntity<>(userRepository.save(updatedUser), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
