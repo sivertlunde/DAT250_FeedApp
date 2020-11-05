@@ -24,7 +24,7 @@ import no.hvl.dat250.feedapp.model.User;
 import no.hvl.dat250.feedapp.repository.RoleRepository;
 import no.hvl.dat250.feedapp.repository.UserRepository;
 
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "*")
 @RestController
 public class UserController {
 

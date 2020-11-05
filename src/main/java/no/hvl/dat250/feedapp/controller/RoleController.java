@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import no.hvl.dat250.feedapp.model.Role;
 import no.hvl.dat250.feedapp.repository.RoleRepository;
 
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "*")
 @RestController
 public class RoleController {
 	
