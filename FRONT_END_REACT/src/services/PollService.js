@@ -7,6 +7,10 @@ class PollService {
     getPolls() {
         return axios.get(POLLS_REST_API_URL);
     }
+
+    getPoll(id) {
+        return axios.get(POLLS_REST_API_URL+'/'+id);
+    }
 }
 
 export default new PollService();
