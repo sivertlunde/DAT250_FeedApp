@@ -110,9 +110,9 @@ public class PollController {
 	}
 
 	@GetMapping("/polls/recentlyfinished")
-	public ResponseEntity<Integer> getEndedPolls() {
+	public ResponseEntity<List<Integer>> getEndedPolls() {
 		Timestamp prev = new Timestamp(System.currentTimeMillis()-60000);
-		Optional<Integer> idEndedPolls = pollRepository.findEndedPolls(prev);
+		Optional<List<Integer>> idEndedPolls = pollRepository.findEndedPolls(prev);
 		
 		if (idEndedPolls.isPresent()) {
 			return new ResponseEntity<>(idEndedPolls.get(), HttpStatus.OK);

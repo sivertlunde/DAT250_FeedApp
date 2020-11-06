@@ -14,7 +14,7 @@ public interface PollRepository extends CrudRepository<Poll, Long> {
 
 	Iterable<Poll> findByTitleContaining(String title);
 	
-	@Query("from Poll p where p.endDate < CURRENT_TIMESTAMP and p.endDate > :prev")//TODO: DETTE ER BROKEN 
-	Optional<Integer> findEndedPolls(@Param("prev")Timestamp prev);
+	@Query("select id from Poll p where p.endDate < CURRENT_TIMESTAMP and p.endDate > :prev")//TODO: DETTE ER BROKEN 
+	Optional<List<Integer>> findEndedPolls(@Param("prev")Timestamp prev);
 
 }
