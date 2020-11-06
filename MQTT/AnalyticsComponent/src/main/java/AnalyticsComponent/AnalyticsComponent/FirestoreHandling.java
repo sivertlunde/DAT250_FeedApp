@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONObject;
+
 import com.google.api.core.ApiFuture;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.DocumentReference;
@@ -19,7 +21,7 @@ import com.google.firebase.cloud.FirestoreClient;
 
 public class FirestoreHandling {
 	
-	public void saveInFirestore(String string){
+	public static void saveInFirestore(String string){
 		GoogleCredentials credentials;
 		try {
 			credentials = GoogleCredentials.getApplicationDefault();
@@ -31,17 +33,9 @@ public class FirestoreHandling {
 
 				Firestore db = FirestoreClient.getFirestore();
 				
-				DocumentReference docRef = db.collection("users").document("alovelace");
-				// Add document data  with id "alovelace" using a hashmap
-				Map<String, Object> data = new HashMap<>();
-				data.put("first", "Ada");
-				data.put("last", "Lovelace");
-				data.put("born", 1815);
-				//asynchronously write data
-				ApiFuture<WriteResult> result = docRef.set(data);
-				// ...
-				// result.get() blocks on response
-				System.out.println("Update time : " + result.get().getUpdateTime());
+				JSONObject json = new JSONObject(string);
+				
+				
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
