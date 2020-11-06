@@ -33,25 +33,8 @@ public class Server extends CoapServer {
 	}
 
 	public Server() throws SocketException {
-		add(new PublishResource());
 		add(new VoteResource());
 		add(new PollResource());
-	}
-
-	class PublishResource extends CoapResource {
-		public PublishResource() {
-			super("publish");
-			getAttributes().setTitle("Publish Resource");
-		}
-
-		public void handlePOST(CoapExchange exchange) {
-			System.out.println(exchange.getRequestText());
-			exchange.respond("POST_REQUEST_SUCCESS");
-		}
-
-		public void handleGET(CoapExchange exchange) {
-			exchange.respond("GET_REQUEST_SUCCESS");
-		}
 	}
 	
 	class PollResource extends CoapResource {
@@ -69,7 +52,8 @@ public class Server extends CoapServer {
 				con.setRequestMethod("GET");
 				con.connect();
 				response = ResponseBuilder.getReturnBody(con);
-				System.out.println("\nBODY ONLY:\n" + response);
+				System.out.println(con.getResponseCode() + con.getResponseMessage());
+				con.disconnect();
 			} catch (Exception e) {
 				e.printStackTrace();
 				exchange.respond("POST_REQUEST_FAILED");
@@ -77,20 +61,6 @@ public class Server extends CoapServer {
 			exchange.respond(response);
 		}
 
-		public void handleGET(CoapExchange exchange) {
-			String pollId = new String(exchange.getRequestPayload());
-			try {
-				URL url = new URL(HTTP_URL + "/polls/result/" + pollId);
-				HttpURLConnection con = (HttpURLConnection) url.openConnection();
-				con.setRequestMethod("GET");
-				con.connect();
-				System.out.println(ResponseBuilder.getFullResponse(con));
-				System.out.println("\nBODY ONLY:\n" + ResponseBuilder.getReturnBody(con));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			exchange.respond("GET_REQUEST_SUCCESS");
-		}
 	}
 
 	class VoteResource extends CoapResource {
@@ -101,8 +71,6 @@ public class Server extends CoapServer {
 
 		public void handlePOST(CoapExchange exchange) {
 			JSONObject json = new JSONObject(new String(exchange.getRequestPayload()));
-			System.out.println("Green from json: " + json.get("green"));
-			System.out.println(exchange.getRequestText());
 			try {
 				
 				URL url = new URL(HTTP_URL + "/votes/many");
@@ -123,7 +91,7 @@ public class Server extends CoapServer {
 				out.write(postDataBytes);
 				out.flush();
 				out.close();
-				System.out.println(ResponseBuilder.getFullResponse(con));
+				System.out.println("Vote resource [post] - Response code: " + con.getResponseCode());
 				con.disconnect();
 				
 			} catch (IOException e) {
@@ -136,18 +104,6 @@ public class Server extends CoapServer {
 			exchange.respond("POST_REQUEST_SUCCESS");
 		}
 
-		public void handleGET(CoapExchange exchange) {
-			try {
-				URL url = new URL(HTTP_URL + "/votes");
-				HttpURLConnection con = (HttpURLConnection) url.openConnection();
-				con.setRequestMethod("GET");
-				con.connect();
-				System.out.println(ResponseBuilder.getFullResponse(con));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			exchange.respond("GET_REQUEST_SUCCESS");
-		}
 	}
 
 	static class ParameterStringBuilder {
@@ -176,8 +132,8 @@ public class Server extends CoapServer {
 			// read headers
 			con.getHeaderFields().entrySet().stream().filter(entry -> entry.getKey() != null).forEach(entry -> {
 				fullResponseBuilder.append(entry.getKey()).append(": ");
-				List headerValues = entry.getValue();
-				Iterator it = headerValues.iterator();
+				List<String> headerValues = entry.getValue();
+				Iterator<String> it = headerValues.iterator();
 				if (it.hasNext()) {
 					fullResponseBuilder.append(it.next());
 					while (it.hasNext()) {
