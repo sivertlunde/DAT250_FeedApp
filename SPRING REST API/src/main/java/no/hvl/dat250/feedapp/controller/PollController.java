@@ -1,5 +1,6 @@
 package no.hvl.dat250.feedapp.controller;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class PollController {
 		}
 	}
 	
-	@GetMapping("/polls/live/{id}")
+	@GetMapping("/polls/result/{id}")
 	public ResponseEntity<Map<String, Object>> getLiveResults(@PathVariable("id") long id) {
 		Optional<Poll> pollData = pollRepository.findById(id);
 		if (pollData.isPresent()) {
@@ -95,6 +96,7 @@ public class PollController {
 			greenJson.put("amount", green);
 			
 			JSONObject json = new JSONObject();
+			json.put("id", poll.getId());
 			json.put("title", poll.getTitle());
 			json.put("description", poll.getDescription());
 			json.put("startDate", poll.getStartDate());
@@ -107,13 +109,15 @@ public class PollController {
 		}	
 	}
 
-	@GetMapping("/polls/finishedBy")
-	public ResponseEntity<Poll> getEndedPolls() {
-		Optional<Poll> endedPolls = pollRepository.findEndedPolls();
-		if (endedPolls.isPresent()) {
-			return new ResponseEntity<>(endedPolls.get(), HttpStatus.OK);
+	@GetMapping("/polls/recentlyfinished")
+	public ResponseEntity<Integer> getEndedPolls() {
+		Timestamp prev = new Timestamp(System.currentTimeMillis()-60000);
+		Optional<Integer> idEndedPolls = pollRepository.findEndedPolls(prev);
+		
+		if (idEndedPolls.isPresent()) {
+			return new ResponseEntity<>(idEndedPolls.get(), HttpStatus.OK);
 		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 	}
 
