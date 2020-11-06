@@ -35,6 +35,7 @@ public class Server extends CoapServer {
 	public Server() throws SocketException {
 		add(new PublishResource());
 		add(new VoteResource());
+		add(new PollResource());
 	}
 
 	class PublishResource extends CoapResource {
@@ -60,11 +61,34 @@ public class Server extends CoapServer {
 		}
 
 		public void handlePOST(CoapExchange exchange) {
-			System.out.println(exchange.getRequestText());
-			exchange.respond("POST_REQUEST_SUCCESS");
+			String pollId = new String(exchange.getRequestPayload());
+			String response = "No Data";
+			try {
+				URL url = new URL(HTTP_URL + "/polls/live/" + pollId);
+				HttpURLConnection con = (HttpURLConnection) url.openConnection();
+				con.setRequestMethod("GET");
+				con.connect();
+				response = ResponseBuilder.getReturnBody(con);
+				System.out.println("\nBODY ONLY:\n" + response);
+			} catch (Exception e) {
+				e.printStackTrace();
+				exchange.respond("POST_REQUEST_FAILED");
+			}
+			exchange.respond(response);
 		}
 
 		public void handleGET(CoapExchange exchange) {
+			String pollId = new String(exchange.getRequestPayload());
+			try {
+				URL url = new URL(HTTP_URL + "/polls/live/" + pollId);
+				HttpURLConnection con = (HttpURLConnection) url.openConnection();
+				con.setRequestMethod("GET");
+				con.connect();
+				System.out.println(ResponseBuilder.getFullResponse(con));
+				System.out.println("\nBODY ONLY:\n" + ResponseBuilder.getReturnBody(con));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			exchange.respond("GET_REQUEST_SUCCESS");
 		}
 	}
@@ -99,7 +123,7 @@ public class Server extends CoapServer {
 				out.write(postDataBytes);
 				out.flush();
 				out.close();
-				System.out.println(FullResponseBuilder.getFullResponse(con));
+				System.out.println(ResponseBuilder.getFullResponse(con));
 				con.disconnect();
 				
 			} catch (IOException e) {
@@ -118,7 +142,7 @@ public class Server extends CoapServer {
 				HttpURLConnection con = (HttpURLConnection) url.openConnection();
 				con.setRequestMethod("GET");
 				con.connect();
-				System.out.println(FullResponseBuilder.getFullResponse(con));
+				System.out.println(ResponseBuilder.getFullResponse(con));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -142,7 +166,7 @@ public class Server extends CoapServer {
 		}
 	}
 
-	static class FullResponseBuilder {
+	static class ResponseBuilder {
 		public static String getFullResponse(HttpURLConnection con) throws IOException {
 			StringBuilder fullResponseBuilder = new StringBuilder();
 
@@ -164,6 +188,12 @@ public class Server extends CoapServer {
 			});
 
 			// read response content
+			String body = getReturnBody(con);
+
+			return fullResponseBuilder.toString() + body;
+		}
+		
+		public static String getReturnBody(HttpURLConnection con) throws IOException {
 			BufferedReader in = null;
 			if (con.getResponseCode() > 299) {
 				in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
@@ -176,8 +206,7 @@ public class Server extends CoapServer {
 				content.append(inputLine);
 			}
 			in.close();
-
-			return fullResponseBuilder.toString() + content.toString();
+			return content.toString();
 		}
 	}
 }

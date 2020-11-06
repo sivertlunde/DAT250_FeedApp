@@ -1,10 +1,11 @@
 package no.hvl.dat250.feedapp.controller;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,123 +21,164 @@ import org.springframework.web.bind.annotation.RestController;
 
 import no.hvl.dat250.feedapp.model.Poll;
 import no.hvl.dat250.feedapp.model.User;
+import no.hvl.dat250.feedapp.model.Vote;
 import no.hvl.dat250.feedapp.repository.PollRepository;
 import no.hvl.dat250.feedapp.repository.UserRepository;
 
 @CrossOrigin(origins = "*")
 @RestController
 public class PollController {
-	
+
 	@Autowired
 	PollRepository pollRepository;
-	
+
 	@Autowired
 	UserRepository userRepository;
 
 	@GetMapping("/polls")
-	public ResponseEntity<List<Poll>> getAllPolls(@RequestParam(required=false)String title) {
+	public ResponseEntity<List<Poll>> getAllPolls(@RequestParam(required = false) String title) {
 		try {
 			List<Poll> polls = new ArrayList<Poll>();
-			
-			if(title==null) {
+
+			if (title == null) {
 				pollRepository.findAll().forEach(polls::add);
-			}else {
+			} else {
 				pollRepository.findByTitleContaining(title).forEach(polls::add);
 			}
-			
-			if(polls.isEmpty()) {
+
+			if (polls.isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
-			
+
 			return new ResponseEntity<>(polls, HttpStatus.OK);
-		}catch(Exception e) {
+		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
-	@GetMapping("/polls/{id}")
-	  public ResponseEntity<Poll> getPollById(@PathVariable("id") long id) {
-	    Optional<Poll> pollData = pollRepository.findById(id);
 
-	    if (pollData.isPresent()) {
-	      return new ResponseEntity<>(pollData.get(), HttpStatus.OK);
-	    } else {
-	      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-	    }
-	  }
+	@GetMapping("/polls/{id}")
+	public ResponseEntity<Poll> getPollById(@PathVariable("id") long id) {
+		Optional<Poll> pollData = pollRepository.findById(id);
+
+		if (pollData.isPresent()) {
+			return new ResponseEntity<>(pollData.get(), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
 	
+	@GetMapping("/polls/live/{id}")
+	public ResponseEntity<Map<String, Object>> getLiveResults(@PathVariable("id") long id) {
+		Optional<Poll> pollData = pollRepository.findById(id);
+		if (pollData.isPresent()) {
+			
+			Poll poll = pollData.get();
+			int red = 0;
+			int green = 0;
+
+			List<Vote> votes = poll.getVotes();
+			for (Vote v : votes) {
+				int result = v.getResult();
+				if (result == 0) {
+					red++;
+				} else {
+					green++;
+				}
+			}
+			
+			JSONObject redJson = new JSONObject();
+			redJson.put("text", poll.getRed());
+			redJson.put("amount", red);
+			
+			JSONObject greenJson = new JSONObject();
+			greenJson.put("text", poll.getGreen());
+			greenJson.put("amount", green);
+			
+			JSONObject json = new JSONObject();
+			json.put("title", poll.getTitle());
+			json.put("description", poll.getDescription());
+			json.put("startDate", poll.getStartDate());
+			json.put("endDate", poll.getEndDate());
+			json.put("red", redJson);
+			json.put("green", greenJson);
+			return new ResponseEntity<>(json.toMap(), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}	
+	}
+
 	@GetMapping("/polls/finishedBy")
-		public ResponseEntity<Poll> getEndedPolls(){
+	public ResponseEntity<Poll> getEndedPolls() {
 		Optional<Poll> endedPolls = pollRepository.findEndedPolls();
 		if (endedPolls.isPresent()) {
-		      return new ResponseEntity<>(endedPolls.get(), HttpStatus.OK);
-		    } else {
-		      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		    }
-		
-	} 
-	
-	@PostMapping("/polls")
-	//@RequestMapping(value = "/polls", method = RequestMethod.POST, 
-			//produces = "charset=utf-8; application/json")
-	//@ResponseBody
-	  public ResponseEntity<Poll> createPoll(@RequestBody Poll poll, @RequestParam(required=true)Long userId) {
-	    try {
-	      Poll newPoll = new Poll(poll.getTitle(), poll.getDescription(), poll.getGreen(), poll.getRed(), poll.getIsPublic(), null);
-	      if(userId != null) {
-	    	  Optional<User> user = userRepository.findById(userId);
-	    	  if(user.isPresent()) {
-	    		  newPoll.setCreatedBy(user.get());
-	    		  Poll savedPoll = pollRepository.save(newPoll);
-	    		  return new ResponseEntity<>(savedPoll, HttpStatus.CREATED);
-	    	  }else {
-	    		  return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-	    	  }
-	    	  
-	      }
-	      return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-	    } catch (Exception e) {
-	    	e.printStackTrace();
-	      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-	    }
-	  }
-	
-	@PutMapping("/polls/{id}")
-	  public ResponseEntity<Poll> updatePoll(@PathVariable("id") long id, @RequestBody Poll poll) {
-	    Optional<Poll> pollData = pollRepository.findById(id);
+			return new ResponseEntity<>(endedPolls.get(), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
 
-	    if (pollData.isPresent()) {
-	      Poll _poll = pollData.get();
-	      _poll.setTitle(poll.getTitle());
-	      _poll.setDescription(poll.getDescription());
-	      _poll.setGreen(poll.getGreen());
-	      _poll.setRed(poll.getRed());
-	      _poll.setIsPublic(poll.getIsPublic());
-	      _poll.setCreatedBy(poll.getCreatedBy());
-	      return new ResponseEntity<>(pollRepository.save(_poll), HttpStatus.OK);
-	    } else {
-	      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-	    }
-	  }
-	
-	 @DeleteMapping("/polls/{id}")
-	  public ResponseEntity<HttpStatus> deletePoll(@PathVariable("id") long id) {
-	    try {
-	      pollRepository.deleteById(id);
-	      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-	    } catch (Exception e) {
-	      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-	    }
-	  }
-	
-	 @DeleteMapping("/polls")
-	  public ResponseEntity<HttpStatus> deleteAllPolls() {
-	    try {
-	      pollRepository.deleteAll();
-	      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-	    } catch (Exception e) {
-	      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-	    }
-	 }
-	 
+	@PostMapping("/polls")
+	// @RequestMapping(value = "/polls", method = RequestMethod.POST,
+	// produces = "charset=utf-8; application/json")
+	// @ResponseBody
+	public ResponseEntity<Poll> createPoll(@RequestBody Poll poll, @RequestParam(required = true) Long userId) {
+		try {
+			Poll newPoll = new Poll(poll.getTitle(), poll.getDescription(), poll.getGreen(), poll.getRed(),
+					poll.getIsPublic(), null);
+			if (userId != null) {
+				Optional<User> user = userRepository.findById(userId);
+				if (user.isPresent()) {
+					newPoll.setCreatedBy(user.get());
+					Poll savedPoll = pollRepository.save(newPoll);
+					return new ResponseEntity<>(savedPoll, HttpStatus.CREATED);
+				} else {
+					return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+				}
+
+			}
+			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@PutMapping("/polls/{id}")
+	public ResponseEntity<Poll> updatePoll(@PathVariable("id") long id, @RequestBody Poll poll) {
+		Optional<Poll> pollData = pollRepository.findById(id);
+
+		if (pollData.isPresent()) {
+			Poll _poll = pollData.get();
+			_poll.setTitle(poll.getTitle());
+			_poll.setDescription(poll.getDescription());
+			_poll.setGreen(poll.getGreen());
+			_poll.setRed(poll.getRed());
+			_poll.setIsPublic(poll.getIsPublic());
+			_poll.setCreatedBy(poll.getCreatedBy());
+			return new ResponseEntity<>(pollRepository.save(_poll), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
+
+	@DeleteMapping("/polls/{id}")
+	public ResponseEntity<HttpStatus> deletePoll(@PathVariable("id") long id) {
+		try {
+			pollRepository.deleteById(id);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@DeleteMapping("/polls")
+	public ResponseEntity<HttpStatus> deleteAllPolls() {
+		try {
+			pollRepository.deleteAll();
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
 }

@@ -9,24 +9,24 @@ import org.eclipse.californium.elements.exception.ConnectorException;
 import org.json.JSONObject;
 
 public class VotingDevice {
-	
+
 	final static String COAP_URL = "coap://localhost:5683";
 
-public static void main(String[] args) {
-		
+	public static void main(String[] args) {
+
 		CoapClient client = new CoapClient(COAP_URL + "/vote");
 
 		System.out.println("SYNCHRONOUS");
-		
+
 		// synchronous
 		try {
 			String content1 = client.get().getResponseText();
 			System.out.println("RESPONSE 1: " + content1);
-			
+
 			JSONObject json = new JSONObject();
-			json.put("green", 49);
-			json.put("red", 51);
-			json.put("poll", 25);
+			json.put("green", 3);
+			json.put("red", 5);
+			json.put("poll", 40);
 			CoapResponse resp2 = client.post(json.toString(), MediaTypeRegistry.TEXT_PLAIN);
 			System.out.println("RESPONSE 2 CODE: " + resp2.getResponseText());
 		} catch (ConnectorException e1) {
@@ -34,7 +34,7 @@ public static void main(String[] args) {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		
+
 //		// asynchronous
 //		
 //		System.out.println("ASYNCHRONOUS (press enter to continue)");
