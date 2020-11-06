@@ -25,6 +25,7 @@ public class FeedappApplication {
 		SpringApplication.run(FeedappApplication.class, args);
 	}
 
+	/*
 	@Bean
 	public CommandLineRunner demo(RoleRepository rr, UserRepository ur, PollRepository pr, VoteRepository vr) {
 		return (args) -> {
@@ -58,5 +59,6 @@ public class FeedappApplication {
 			log.info("");
 		};
 	}
+	*/
 
 }
