@@ -63,10 +63,10 @@ public class VoteController {
 	}
 
 	@PostMapping("/votes")
-	public ResponseEntity<Vote> createVote(@RequestBody Vote vote, @RequestParam(required = false) Long voterId,
-			@RequestParam(required = true) Long pollId) {
+	public ResponseEntity<Vote> createVote(@RequestParam(required = false) Long voterId,
+			@RequestParam(required = true) Long pollId, @RequestParam(required = true) Integer vote) {
 		try {
-			Vote newVote = new Vote(vote.getResult(), null, null);
+			Vote newVote = new Vote(vote, null, null);
 			if (voterId != null) {
 				Optional<User> voterById = userRepository.findById(voterId);
 				if (voterById.isPresent()) {
@@ -79,7 +79,7 @@ public class VoteController {
 			if (pollId != null) {
 				Optional<Poll> pollById = pollRepository.findById(pollId);
 				if (pollById.isPresent()) {
-					newVote.setPoll(pollById.get());					
+					newVote.setPoll(pollById.get());
 				} else {
 					return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 				}
@@ -88,6 +88,49 @@ public class VoteController {
 			}
 			Vote _vote = voteRepository.save(newVote);
 			return new ResponseEntity<>(_vote, HttpStatus.CREATED);
+		} catch (Exception e) {
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@PostMapping("/votes/many")
+	public ResponseEntity<List<Vote>> createVotes(@RequestParam(required = true) String poll,
+			@RequestParam(required = false) String red, @RequestParam(required = false) String green) {
+		try {
+			if (poll != null) {
+
+				int redVotes;
+				int greenVotes;
+				Long pollId;
+				try {
+					pollId = Long.valueOf(poll);
+					redVotes = red != null ? Integer.parseInt(red) : 0;
+					greenVotes = green != null ? Integer.parseInt(green) : 0;
+				} catch (NumberFormatException e) {
+					return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+				}
+
+				Optional<Poll> pollById = pollRepository.findById(pollId);
+				if (pollById.isPresent()) {
+					List<Vote> votes = new ArrayList<>();
+					for (int i = 0; i < redVotes; i++) {
+						Vote v = new Vote(0, null, pollById.get());
+						voteRepository.save(v);
+						votes.add(v);
+					}
+					for (int i = 0; i < greenVotes; i++) {
+						Vote v = new Vote(1, null, pollById.get());
+						voteRepository.save(v);
+						votes.add(v);
+					}
+					return new ResponseEntity<>(votes, HttpStatus.CREATED);
+				} else {
+					return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				}
+			} else {
+				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+			}
+
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
