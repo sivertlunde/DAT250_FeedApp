@@ -96,6 +96,7 @@ public class PollController {
 			greenJson.put("amount", green);
 			
 			JSONObject json = new JSONObject();
+			json.put("id", poll.getId());
 			json.put("title", poll.getTitle());
 			json.put("description", poll.getDescription());
 			json.put("startDate", poll.getStartDate());
