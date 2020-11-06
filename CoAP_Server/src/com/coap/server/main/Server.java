@@ -64,7 +64,7 @@ public class Server extends CoapServer {
 			String pollId = new String(exchange.getRequestPayload());
 			String response = "No Data";
 			try {
-				URL url = new URL(HTTP_URL + "/polls/live/" + pollId);
+				URL url = new URL(HTTP_URL + "/polls/result/" + pollId);
 				HttpURLConnection con = (HttpURLConnection) url.openConnection();
 				con.setRequestMethod("GET");
 				con.connect();
@@ -80,7 +80,7 @@ public class Server extends CoapServer {
 		public void handleGET(CoapExchange exchange) {
 			String pollId = new String(exchange.getRequestPayload());
 			try {
-				URL url = new URL(HTTP_URL + "/polls/live/" + pollId);
+				URL url = new URL(HTTP_URL + "/polls/result/" + pollId);
 				HttpURLConnection con = (HttpURLConnection) url.openConnection();
 				con.setRequestMethod("GET");
 				con.connect();
