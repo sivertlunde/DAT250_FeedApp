@@ -4,6 +4,9 @@
 # XML files
 **/persistence.xml
 
+#Firebase
+**/feedapp-56dfe-firebase-adminsdk-isgww-df9eb5fba2.json
+
 # Derby
 derbyDB/
 UsersaredaDocumentsDAT250DAT250_Assignment2/
