@@ -1,6 +1,7 @@
 package no.hvl.dat250.feedapp.controller;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,6 +64,18 @@ public class PollController {
 	      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	    }
 	  }
+	
+	@GetMapping("/polls/finishedBy")
+		public ResponseEntity<Poll> getEndedPolls(){
+		Optional<Poll> endedPolls = pollRepository.findEndedPolls();
+		if (endedPolls.isPresent()) {
+		      return new ResponseEntity<>(endedPolls.get(), HttpStatus.OK);
+		    } else {
+		      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		    }
+		
+	} 
+	
 	@PostMapping("/polls")
 	//@RequestMapping(value = "/polls", method = RequestMethod.POST, 
 			//produces = "charset=utf-8; application/json")
