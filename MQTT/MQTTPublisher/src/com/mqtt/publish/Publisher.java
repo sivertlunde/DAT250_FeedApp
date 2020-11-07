@@ -15,7 +15,7 @@ public class Publisher {
 	public static void main(String[] args) {
 		
 		String messageString = "";
-		List<Integer> oldlist = new ArrayList<>();
+		List<Long> oldlist = new ArrayList<>();
 		
 		while(true) {
 			try {
@@ -24,10 +24,12 @@ public class Publisher {
 	            
 	            con.setRequestMethod("GET");
 	            con.connect();
+	            System.out.println(con.getResponseCode());
+	            System.out.println(con.getContentType());
 	            if(con.getResponseCode() == 200) {
-	            	List<Integer> newlist = (List<Integer>) con.getContent();
+	            	List<Long> newlist = FullResponseBuilderInteger.getFullResponse(con);
 	            	
-	            	for(int i =0; i<= newlist.size(); i++) {
+	            	for(int i =0; i< newlist.size(); i++) {
 	            		if(!oldlist.contains(newlist.get(i))){
 	            			System.out.println("== START PUBLISHER ==");
 	            			URL url2 = new URL("http://localhost:8080/polls/result/"+newlist.get(i));
@@ -42,12 +44,14 @@ public class Publisher {
 		        			System.out.println("\tMessage '"+ messageString +"' to 'iot_data'");
 		        			client.disconnect();
 		        			client.close();
+		        			con2.disconnect();
 		        			
 		        			System.out.println("== END PUBLISHER ==");
 		        			
 	            		}else {
 	            		System.out.println("Poll with id: " + newlist.get(i) + " has already been sent");
 	            		}
+	            		
 		            	
 		            }
 	            	oldlist = newlist;
@@ -56,18 +60,14 @@ public class Publisher {
 	            }else {
 	            	System.out.println("Da frick?");
 	            }
-	            //List<Integer> newlist = con.getInputStream(); 
-	            String s = FullResponseBuilder.getFullResponse(con);
-	            System.out.println(s);
-	            /*
 	            
-	            */
-	            Thread.sleep(1000);
+	            con.disconnect();
+	            Thread.sleep(60000);
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	            
 	        }
-			//Thread.sleep(60000);
+			
 		}
 		
 		
@@ -99,9 +99,9 @@ public class Publisher {
         }
     }
 	
-	/*
+	
 	static class FullResponseBuilderInteger {
-        public static List<Integer> getFullResponse(HttpURLConnection con) throws IOException {
+        public static List<Long> getFullResponse(HttpURLConnection con) throws IOException {
             
             // read response content
             BufferedReader in = null;
@@ -110,10 +110,32 @@ public class Publisher {
             } else {
                 in = new BufferedReader(new InputStreamReader(con.getInputStream()));
             }
+            String inputLine;
+            StringBuffer content = new StringBuffer();
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
+            }
+            in.close();
+
+            String s =content.toString();
             
-            return in;
+            String test2 = s.replaceAll("\\[", "");
+            String test3 = test2.replaceAll("\\]", "");
+            String test4 = test3.replaceAll("\\s", "");
+            String[] array = test4.split(",");
+            
+            List<Long> ids = new ArrayList<>();
+            
+            for (String s2 : array) {
+            	ids.add(Long.parseLong(s2));
+            }
+            
+            return ids;
+            
         }
     }
-    */
+    
+    
+    
 }
 
