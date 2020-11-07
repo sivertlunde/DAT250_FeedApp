@@ -24,19 +24,21 @@ class PollEditor extends React.Component {
 
     render() {
         return (
-            <div>
+            <form>
                 <h1>Poll Editor</h1>
                 Poll name: <p><input type="text" value={this.state.poll.title} onChange={this.handleChange} /></p>
                 Description: <p><input type="textarea" value={this.state.poll.description} onChange={this.handleChange} /></p>
                 Option 1: <p><input type="text" value={this.state.poll.green} onChange={this.handleChange} /></p>
                 Option 2: <p><input type="text" value={this.state.poll.red} onChange={this.handleChange} /></p>
 
+                End date: <p><input type="date" value={this.state.poll.endDate} onChange={this.handleChange} /></p>
+
                 <div>
-                    Public <input type="radio" value="private" name="visibility" />
-                    Private <input type="radio" value="public" name="visibility" />
+                    Public <input type="radio" value="private" name="visibility" defaultChecked={ this.state.poll.isPublic} onChange={this.handleChange} />
+                    Private <input type="radio" value="public" name="visibility" defaultChecked={!this.state.poll.isPublic} onChange={this.handleChange} />
                 </div>
                 <button>Create</button>
-            </div>
+            </form>
         )
     }
 }
