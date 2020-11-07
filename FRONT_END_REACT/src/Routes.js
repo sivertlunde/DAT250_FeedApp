@@ -22,6 +22,9 @@ export default function Routes() {
         <Route path="/createPoll">
             <PollEditor />
         </Route>
+        <Route path="/:id">
+            <PollScreen />
+        </Route>
       </Switch>
     );
   }
