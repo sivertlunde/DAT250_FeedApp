@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Scanner;
 
 import org.eclipse.californium.core.CoapClient;
-import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.elements.exception.ConnectorException;
 import org.json.JSONObject;
@@ -16,6 +15,7 @@ public class VotingDevice {
 	public static void main(String[] args) {
 
 		CoapClient client = new CoapClient(COAP_URL + "/vote");
+		client.ping();
 
 		Scanner in = new Scanner(System.in);
 		boolean stop = false;
@@ -54,7 +54,7 @@ public class VotingDevice {
 						json.put("green", green);
 						json.put("red", red);
 						json.put("poll", pollId);
-						CoapResponse resp2 = client.post(json.toString(), MediaTypeRegistry.TEXT_PLAIN);
+						client.post(json.toString(), MediaTypeRegistry.TEXT_PLAIN);
 						red = 0;
 						green = 0;
 					}
