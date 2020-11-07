@@ -1,20 +1,8 @@
 import React from 'react';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase';
-import Cookies from 'universal-cookie';
+import auth from 'firebase/firebase-auth';
 
-
-// Configure Firebase.
-const config = {
-    apiKey: "AIzaSyC0_DiIJMudH820HnJdOXu-MYFJdCFzVW0",
-    authDomain: "feedapp-56dfe.firebaseapp.com",
-    databaseURL: "https://feedapp-56dfe.firebaseio.com",
-    projectId: "feedapp-56dfe",
-    storageBucket: "feedapp-56dfe.appspot.com",
-    messagingSenderId: "382153420094",
-    appId: "1:382153420094:web:03e9463e68483eff64506f"
-};
-firebase.initializeApp(config);
 
 // Configure FirebaseUI.
 const uiConfig = {
@@ -34,16 +22,22 @@ const uiConfig = {
     ]
 };
 
-const cookies = new Cookies();
-
 class Login extends React.Component {
+
+    constructor(props) {
+        super(props)
+        this.state = {
+            user: null,
+            initializing: true
+        };
+    }
     componentDidMount() {
         this.unregisterAuthObserver = firebase.auth().onAuthStateChanged(
-            (user) => {
-                cookies.set("user", user);
+            (_user) => {
+                this.setState({ user: _user, initializing: false });
+                console.log("user: ", _user);
             }
         );
-        console.log(firebase.auth().currentUser);
     }
 
     componentWillUnmount() {
@@ -51,14 +45,10 @@ class Login extends React.Component {
     }
 
     render() {
-        if (firebase.auth().currentUser != null) {
+        if (this.state.initializing) {
             return (
-                <div>
-                  <h1>FeedApp</h1>
-                  <p>Signed in as {cookies.get("user").displayName}!</p>
-                  <button onClick={() => {firebase.auth().signOut(); window.location.reload()}}>Sign-out</button>
-                </div>
-              );
+                <div></div>
+            );
         }
         
         return (

@@ -22,21 +22,35 @@ class PollComponent extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            polls: []
-        }
+            polls: [],
+            user: null
+        };
     }
 
     componentDidMount() {
         PollService.getPolls().then((response) => {
             this.setState({ polls: response.data })
         });
+        this.unregisterAuthObserver = firebase.auth().onAuthStateChanged(
+            (_user) => {
+                this.setState({ user: _user });
+                console.log("user: ", _user);
+                console.log(cookies);
+            }
+        );
+    }
+
+    componentWillUnmount() {
+        this.unregisterAuthObserver();
     }
 
     render() {
-        console.log("currentuser:", firebase.auth());
+        console.log("currentuser:", firebase.auth().currentUser);
+        console.log("cookie: ", cookies.get("user"));
+        console.log("render user state: ", this.user);
 
 
-        if (cookies.get("user") !== null) {
+        if (this.state.user) {
             return (
 
                 <div>
