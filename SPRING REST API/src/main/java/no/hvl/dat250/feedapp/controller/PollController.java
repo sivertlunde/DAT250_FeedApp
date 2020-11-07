@@ -2,6 +2,7 @@ package no.hvl.dat250.feedapp.controller;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -163,6 +164,23 @@ public class PollController {
 			_poll.setEndDate(poll.getEndDate());
 			return new ResponseEntity<>(pollRepository.save(_poll), HttpStatus.OK);
 		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
+	
+	@PutMapping("/polls/start/{id}")
+	public ResponseEntity<Poll> startPoll(@PathVariable("id") long id, @RequestParam(required=false) Long millis){
+		Optional<Poll> pollData = pollRepository.findById(id);
+		Date date = new Date(System.currentTimeMillis());
+		if(pollData.isPresent()) {
+			Poll _poll = pollData.get();
+			_poll.setStartDate(date);
+			if(millis != null) {
+			Date enddate = new Date(System.currentTimeMillis()+millis);
+			_poll.setEndDate(enddate);
+			}
+			return new ResponseEntity<>(pollRepository.save(_poll), HttpStatus.OK);
+		}else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}

@@ -16,5 +16,6 @@ public interface PollRepository extends CrudRepository<Poll, Long> {
 	
 	@Query("select id from Poll p where p.endDate < CURRENT_TIMESTAMP and p.endDate > :prev")//TODO: DETTE ER BROKEN 
 	Optional<List<Long>> findEndedPolls(@Param("prev")Timestamp prev);
+	
 
 }
