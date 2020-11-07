@@ -5,9 +5,8 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { BrowserRouter as Router } from 'react-router-dom';
-import { firebaseAuth } from './provider/AuthProvider'
 
-ReactDOM.render(
+ReactDOM.render(  
   <React.StrictMode>
     <Router>
         <App />
