@@ -82,14 +82,15 @@ public class HelperClass {
     	int n = string.length();  
     	char[] s =string.toCharArray();
         int res_ind = 0;  
+        int numspaces=0;
       
         for (int i = 0; i < n; i++) {  
         	  
             // check for spaces in the sentence  
             if (s[i] == ' ') {  
-      
+            	numspaces++;
                 // conversion into upper case  
-                s[i + 1] = Character.toUpperCase(s[i + 1]);  
+                s[i+1] = Character.toUpperCase(s[i + 1]);  
                 continue;  
             }  
       
@@ -100,7 +101,8 @@ public class HelperClass {
       
         // return string to main
         String result = new String(s);
-        return result;  
+        String result2 =result.substring(0, result.length()-numspaces);
+        return result2;  
     }  
 	    
 
