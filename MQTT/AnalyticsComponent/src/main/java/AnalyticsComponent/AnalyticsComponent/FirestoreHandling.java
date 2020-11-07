@@ -24,19 +24,25 @@ public class FirestoreHandling {
 	public static void saveInFirestore(String string){
 		GoogleCredentials credentials;
 		try {
-			credentials = GoogleCredentials.getApplicationDefault();
-			FirebaseOptions options = new FirebaseOptions.Builder()
+			InputStream serviceAccount = new FileInputStream("C:/Users/areda/Documents/DAT250/NewTestWorkspace/DAT250_FeedApp/MQTT/feedapp-56dfe-firebase-adminsdk-isgww-df9eb5fba2.json");
+			credentials = GoogleCredentials.fromStream(serviceAccount);
+			FirebaseOptions options = FirebaseOptions.builder()
 				    .setCredentials(credentials)
 				    .setProjectId("feedapp-56dfe")
 				    .build();
 				FirebaseApp.initializeApp(options);
-
-				Firestore db = FirestoreClient.getFirestore();
-				
 				JSONObject json = new JSONObject(string);
 				
+				Firestore db = FirestoreClient.getFirestore();
+				DocumentReference docRef = db.collection("polls").document();
+				ApiFuture<WriteResult> result = docRef.set(json.toMap());
+				System.out.println("Update time : " + result.get().getUpdateTime());
 				
-		} catch (IOException e) {
+				
+				
+				
+				
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		

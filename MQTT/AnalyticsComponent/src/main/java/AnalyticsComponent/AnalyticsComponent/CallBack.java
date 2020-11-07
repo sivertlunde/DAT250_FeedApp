@@ -17,8 +17,7 @@ public class CallBack implements MqttCallback {
 
 	  public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
 	    System.out.println("Message received:\n\t"+ new String(mqttMessage.getPayload()) );
-	    //Gson g = new Gson();
-	    //FirestoreHandling.saveInFirestore(new String(mqttMessage.getPayload())); 
+	    FirestoreHandling.saveInFirestore(new String(mqttMessage.getPayload())); 
 	    //System.out.println(new String(mqttMessage.getPayload()));
 	  }
 
