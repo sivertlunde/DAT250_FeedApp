@@ -2,18 +2,27 @@ import React from 'react';
 import Cookies from 'universal-cookie';
 import PollService from '../services/PollService';
 import firebase from 'firebase';
+import { withRouter } from "react-router";
+
 
 const cookies = new Cookies();
 // Configure Firebase.
 
-function CodeInput() {
+function CodeInput(props) {
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const code = e.target.code.value;
+        props.props.history.push("/"+code);
+    }
+
     return (
-        <div className="input-group col-sm-5 mb-3">
+        <form className="input-group col-sm-5 mb-3" onSubmit={handleSubmit}>
             <div className="input-group-prepend">
-                <button className="btn btn-outline-secondary" type="button">Go</button>
+                <button className="btn btn-outline-secondary" >Go</button>
             </div>
-            <input type="text" className="form-control" placeholder="Pollcode" aria-label="" aria-describedby="basic-addon1"></input>
-        </div>
+            <input id="code" type="number" className="form-control" placeholder="Pollcode" aria-label="" aria-describedby="basic-addon1"></input>
+        </form>
     )
 }
 
@@ -54,7 +63,7 @@ class PollComponent extends React.Component {
             return (
 
                 <div>
-                    <CodeInput/>
+                    <CodeInput props={this.props}/>
                     <h1 className="text-center"> Polls</h1>
                     <table className="table table-striped">
                         <thead>
@@ -91,4 +100,4 @@ class PollComponent extends React.Component {
     }
 }
 
-export default PollComponent
+export default withRouter(PollComponent)
