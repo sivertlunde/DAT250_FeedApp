@@ -11,12 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @JsonIdentityInfo(
@@ -28,10 +24,7 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	private String username;
-	@JsonIgnore
-	private String password;
-	
+	private String email;
 	
 	@OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
 	@JsonIgnoreProperties(value = "createdBy")
@@ -48,9 +41,8 @@ public class User {
 	
 	public User() {}
 
-	public User(String username, String password) {
-		this.username = username;
-		this.password = password;
+	public User(String email) {
+		this.email = email;
 	}
 
 	public Long getId() {
@@ -61,20 +53,12 @@ public class User {
 		this.id = id;
 	}
 
-	public String getUsername() {
-		return username;
+	public String getEmail() {
+		return email;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public List<Poll> getPolls() {
@@ -103,8 +87,6 @@ public class User {
 
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", username=" + username + ", password=" + password + "]";
+		return "User [id=" + id + ", username=" + email + "]";
 	}
-	
-
 }

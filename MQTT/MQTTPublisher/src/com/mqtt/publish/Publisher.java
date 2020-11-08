@@ -1,14 +1,23 @@
 package com.mqtt.publish;
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.json.JSONObject;
+
 
 public class Publisher {
 
@@ -27,14 +36,14 @@ public class Publisher {
 	            System.out.println(con.getResponseCode());
 	            System.out.println(con.getContentType());
 	            if(con.getResponseCode() == 200) {
-	            	List<Long> newlist = FullResponseBuilderInteger.getFullResponse(con);
+	            	List<Long> newlist = HelperClass.getFullLongResponse(con);
 	            	
 	            	for(int i =0; i< newlist.size(); i++) {
 	            		if(!oldlist.contains(newlist.get(i))){
 	            			System.out.println("== START PUBLISHER ==");
 	            			URL url2 = new URL("http://localhost:8080/polls/result/"+newlist.get(i));
 	        	            HttpURLConnection con2 = (HttpURLConnection) url2.openConnection();
-	        	            messageString = FullResponseBuilder.getFullResponse(con2);
+	        	            messageString = HelperClass.getFullStringResponse(con2);
 		        			MqttClient client = new MqttClient("tcp://localhost:1883", MqttClient.generateClientId());
 		        			client.connect();
 		        			MqttMessage message = new MqttMessage();
@@ -46,6 +55,43 @@ public class Publisher {
 		        			client.close();
 		        			con2.disconnect();
 		        			
+		        			
+		        			//DWEET IO
+		        			System.out.println("== DWEETING ==");
+		        			
+		        			JSONObject json = new JSONObject(messageString);
+		        			JSONObject content = new JSONObject();
+		        			String title = HelperClass.removeSpacesAndAddCamelcase(json.getString("title"));
+		        			URL dweet = new URL("https://dweet.io/dweet/for/"+ title);
+		        			
+		        			content.put(json.getJSONObject("red").getString("text"), String.valueOf(json.getJSONObject("red").getInt("amount")));
+		    				//parameters.put("red", String.valueOf(json.getInt("red")));
+		        			content.put(json.getJSONObject("green").getString("text"), String.valueOf(json.getJSONObject("green").getInt("amount")));
+		    				byte[] postDataBytes = content.toString().getBytes("UTF-8");
+		    				HttpURLConnection dweetcon = (HttpURLConnection) dweet.openConnection();
+		    				dweetcon.setRequestMethod("POST");
+		    				dweetcon.setRequestProperty("Content-Type", "application/json");
+		    		        dweetcon.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+		    				dweetcon.setDoOutput(true);
+		    				OutputStream os = dweetcon.getOutputStream();
+		    				OutputStreamWriter out = new OutputStreamWriter(os,"UTF-8");
+		    				out.write(content.toString());
+		    				out.flush();
+		    				out.close();
+		    				os.close();
+		    				System.out.println("Vote resource [post] - Response code: " + dweetcon.getResponseCode());
+		    				dweetcon.disconnect();
+		    				
+		    				//DWEETIO DONE
+		    				System.out.println("== DWEETING DONE, GETTING DWEET ==");
+		    				
+		    				URL dweetget = new URL("https://dweet.io/get/dweets/for/"+title);
+		    				HttpURLConnection dweetgetcon = (HttpURLConnection) dweetget.openConnection();
+		    				String dweetresponse = HelperClass.getFullStringResponse(dweetgetcon);
+		    				System.out.println(dweetresponse);
+		    				dweetgetcon.disconnect();
+		        			
+		        				
 		        			System.out.println("== END PUBLISHER ==");
 		        			
 	            		}else {
@@ -78,62 +124,7 @@ public class Publisher {
 	    
 
 	}
-	static class FullResponseBuilder {
-        public static String getFullResponse(HttpURLConnection con) throws IOException {
-            
-            // read response content
-            BufferedReader in = null;
-            if (con.getResponseCode() > 299) {
-                in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-            } else {
-                in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            }
-            String inputLine;
-            StringBuffer content = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
-            }
-            in.close();
-
-            return  content.toString();
-        }
-    }
-	
-	
-	static class FullResponseBuilderInteger {
-        public static List<Long> getFullResponse(HttpURLConnection con) throws IOException {
-            
-            // read response content
-            BufferedReader in = null;
-            if (con.getResponseCode() > 299) {
-                in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-            } else {
-                in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            }
-            String inputLine;
-            StringBuffer content = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
-            }
-            in.close();
-
-            String s =content.toString();
-            
-            String test2 = s.replaceAll("\\[", "");
-            String test3 = test2.replaceAll("\\]", "");
-            String test4 = test3.replaceAll("\\s", "");
-            String[] array = test4.split(",");
-            
-            List<Long> ids = new ArrayList<>();
-            
-            for (String s2 : array) {
-            	ids.add(Long.parseLong(s2));
-            }
-            
-            return ids;
-            
-        }
-    }
+	 
     
     
     

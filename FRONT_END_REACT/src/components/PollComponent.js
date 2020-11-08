@@ -2,18 +2,27 @@ import React from 'react';
 import Cookies from 'universal-cookie';
 import PollService from '../services/PollService';
 import firebase from 'firebase';
+import { withRouter } from "react-router";
+
 
 const cookies = new Cookies();
 // Configure Firebase.
 
-function CodeInput() {
+function CodeInput(props) {
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const code = e.target.code.value;
+        props.props.history.push("/" + code);
+    }
+
     return (
-        <div className="input-group col-sm-5 mb-3">
+        <form className="input-group col-sm-5 mb-3" onSubmit={handleSubmit}>
             <div className="input-group-prepend">
-                <button className="btn btn-outline-secondary" type="button">Go</button>
+                <button className="btn btn-outline-secondary" >Go</button>
             </div>
-            <input type="text" className="form-control" placeholder="Pollcode" aria-label="" aria-describedby="basic-addon1"></input>
-        </div>
+            <input id="code" type="number" className="form-control form-control-lg" placeholder="Pollcode" aria-label="" aria-describedby="basic-addon1"></input>
+        </form>
     )
 }
 
@@ -53,42 +62,80 @@ class PollComponent extends React.Component {
         if (this.state.user) {
             return (
 
-                <div>
-                    <CodeInput/>
-                    <h1 className="text-center"> Polls</h1>
-                    <table className="table table-striped">
-                        <thead>
-                            <tr>
-                                <td>Poll id</td>
-                                <td>Title</td>
-                                <td>Description</td>
-                                <td>Start date</td>
-                                <td>End date</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                this.state.polls.map(
-                                    poll =>
-                                        <tr key={poll.id}>
-                                            <td> {poll.id}</td>
-                                            <td> {poll.title}</td>
-                                            <td> {poll.description}</td>
-                                            <td> {poll.startDate}</td>
-                                            <td> {poll.endDate}</td>
-                                        </tr>
-                                )
-                            }
-                        </tbody>
-                    </table>
+                <div className="container">
+                    <CodeInput props={this.props} />
+                    <div className="row justify-content-around">
+                        <div className="col-xs-6 ">
+                            <h1 className="text-center">Your Polls</h1>
+                            <table className="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <td>Title</td>
+                                        <td>Description</td>
+                                        <td>Start date</td>
+                                        <td>End date</td>
+                                        <td>Link</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        this.state.polls.map(
+                                            poll =>
+                                                <tr key={poll.id}>
+                                                    <td> {poll.title}</td>
+                                                    <td> {poll.description}</td>
+                                                    <td> {poll.startDate}</td>
+                                                    <td> {poll.endDate}</td>
+                                                    <td> <a href={"/" + poll.id}>Link</a></td>
+                                                </tr>
+                                        )
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        {/* 
+                            Disse to tabellene viser det samme atm.
+                        */ }
+                        <div className="col-xs-6 ">
+                            <h1>Your votes</h1>
+                            <table className="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <td>Title</td>
+                                        <td>Description</td>
+                                        <td>Start date</td>
+                                        <td>End date</td>
+                                        <td>Link</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        this.state.polls.map(
+                                            poll =>
+                                                <tr key={poll.id}>
+                                                    <td> {poll.title}</td>
+                                                    <td> {poll.description}</td>
+                                                    <td> {poll.startDate}</td>
+                                                    <td> {poll.endDate}</td>
+                                                    <td> <a href={"/" + poll.id}>Link</a></td>
+                                                </tr>
+                                        )
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             )
         }
 
         return (
-            <CodeInput/>
+            <div className="container">
+                <CodeInput />
+            </div>
+
         )
     }
 }
 
-export default PollComponent
+export default withRouter(PollComponent)

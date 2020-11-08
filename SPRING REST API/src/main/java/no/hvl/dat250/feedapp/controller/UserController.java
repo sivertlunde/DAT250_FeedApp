@@ -3,7 +3,6 @@ package no.hvl.dat250.feedapp.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,14 +14,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
 import no.hvl.dat250.feedapp.model.Role;
 import no.hvl.dat250.feedapp.model.User;
 import no.hvl.dat250.feedapp.repository.RoleRepository;
 import no.hvl.dat250.feedapp.repository.UserRepository;
+import no.hvl.dat250.feedapp.service.FirebaseInitializer;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -33,19 +34,18 @@ public class UserController {
 	
 	@Autowired
 	RoleRepository roleRepository;
+	
+	@Autowired
+	FirebaseInitializer db;
 
 	@GetMapping("/users")
-	public ResponseEntity<List<User>> getAllUsers() {
+	public ResponseEntity<List<User>> getAllUsers(){
 		try {
 			List<User> users = new ArrayList<User>();
-			userRepository.findAll().forEach(users::add);
-
 			if (users.isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
-
 			return new ResponseEntity<>(users, HttpStatus.OK);
-
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -54,7 +54,6 @@ public class UserController {
 	@GetMapping("/users/{id}")
 	public ResponseEntity<User> getUserById(@PathVariable("id") Long id) {
 		Optional<User> user = userRepository.findById(id);
-
 		System.out.println(id);
 		if (user.isPresent()) {
 			return new ResponseEntity<>(user.get(), HttpStatus.OK);
@@ -63,11 +62,12 @@ public class UserController {
 		}
 	}
 
-	@GetMapping("/users/username/{username}")
-	public ResponseEntity<User> getUserByUsername(@PathVariable("username") String username) {
-		Optional<User> user = userRepository.findByUsername(username);
-
-		if (user.isPresent()) {
+	@GetMapping("/users/user/{email}")
+	public ResponseEntity<User> getUserByUsername(@PathVariable("email") String email, @RequestBody FirebaseToken idToken) throws FirebaseAuthException{
+		boolean checkRevoked = true;
+		FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken.getUid(), checkRevoked);
+		Optional<User> user = userRepository.findByUsername(email);
+		if (user.isPresent() && email == decodedToken.getEmail()) {
 			return new ResponseEntity<>(user.get(), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -75,12 +75,13 @@ public class UserController {
 	}
 
 	@PostMapping(value = "/users", consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<User> createUser(@RequestBody User user, @RequestParam(required = true) Long roleId) {
+	public ResponseEntity<User> createUser(@RequestBody User user, @RequestParam(required = true) Long roleId, @RequestBody FirebaseToken idToken) throws FirebaseAuthException{
 		try {
-			User newUser = new User(user.getUsername(), user.getPassword());
+			FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken.getUid());
+			User newUser = new User(user.getEmail());
 			if (roleId != null) {
 				Optional<Role> role = roleRepository.findById(roleId);
-				if (role.isPresent()) {
+				if (role.isPresent() && newUser.getEmail() == decodedToken.getEmail()) {
 					newUser.setRole(role.get());
 				}
 			}
@@ -95,14 +96,10 @@ public class UserController {
 	//@RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<User> updateUser(@PathVariable("id") Long id, @RequestBody User user, @RequestParam(required = false) Long roleId) {
 		Optional<User> userData = userRepository.findById(id);
-
 		if (userData.isPresent()) {
 			User updatedUser = userData.get();
-			if (user.getUsername() != null) {
-				updatedUser.setUsername(user.getUsername());
-			}
-			if (user.getPassword() != null) {
-				updatedUser.setPassword(user.getPassword());
+			if (user.getEmail() != null) {
+				updatedUser.setEmail(user.getEmail());
 			}
 			if (roleId != null) {
 				Optional<Role> role = roleRepository.findById(roleId);
