@@ -1,5 +1,6 @@
 package no.hvl.dat250.feedapp.controller;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,14 +19,19 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
 
 import no.hvl.dat250.feedapp.model.Poll;
 import no.hvl.dat250.feedapp.model.User;
 import no.hvl.dat250.feedapp.model.Vote;
 import no.hvl.dat250.feedapp.repository.PollRepository;
 import no.hvl.dat250.feedapp.repository.UserRepository;
+import no.hvl.dat250.feedapp.service.FirebaseInitializer;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -36,6 +42,9 @@ public class PollController {
 
 	@Autowired
 	UserRepository userRepository;
+	
+	@Autowired
+	FirebaseInitializer firebase;
 
 	@GetMapping("/polls")
 	public ResponseEntity<List<Poll>> getAllPolls(@RequestParam(required = false) String title) {
@@ -126,26 +135,32 @@ public class PollController {
 	// @RequestMapping(value = "/polls", method = RequestMethod.POST,
 	// produces = "charset=utf-8; application/json")
 	// @ResponseBody
-	public ResponseEntity<Poll> createPoll(@RequestBody Poll poll, @RequestParam(required = true) Long userId) {
-		try {
-			Poll newPoll = new Poll(poll.getTitle(), poll.getDescription(), poll.getGreen(), poll.getRed(),
-					poll.getIsPublic(), null);
-			if (userId != null) {
-				Optional<User> user = userRepository.findById(userId);
-				if (user.isPresent()) {
-					newPoll.setCreatedBy(user.get());
-					Poll savedPoll = pollRepository.save(newPoll);
-					return new ResponseEntity<>(savedPoll, HttpStatus.CREATED);
-				} else {
-					return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-				}
+	public ResponseEntity<Poll> createPoll(@RequestHeader (name="Authorization") String token, @RequestBody Poll poll, @RequestParam(required = true) Long userId) {
+		String _token = token.replaceAll("Bearer ", "");
+		if (tokenIsValid(_token)) {
+			try {
+				Poll newPoll = new Poll(poll.getTitle(), poll.getDescription(), poll.getGreen(), poll.getRed(),
+						poll.getIsPublic(), null);
+				if (userId != null) {
+					Optional<User> user = userRepository.findById(userId);
+					if (user.isPresent()) {
+						newPoll.setCreatedBy(user.get());
+						Poll savedPoll = pollRepository.save(newPoll);
+						return new ResponseEntity<>(savedPoll, HttpStatus.CREATED);
+					} else {
+						return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+					}
 
+				}
+				return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 			}
-			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
+		
 	}
 
 	@PutMapping("/polls/{id}")
@@ -203,6 +218,20 @@ public class PollController {
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	private boolean tokenIsValid(String token) {
+		try {
+			FirebaseToken decodedToken = firebase.getAuth().verifyIdToken(token);
+			String uid = decodedToken.getUid();
+			System.out.println("Returnert fra verifyToken: " + uid);
+			return true;
+		} catch (FirebaseAuthException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 }

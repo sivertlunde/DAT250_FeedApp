@@ -15,10 +15,10 @@ class PollEditor extends React.Component {
 
     getPollData = (id) => {
         PollService.getPoll(id).then((response) => {
-            console.log(response.data);
             this.setState({ poll: response.data })
         })
             .catch((error) => {
+                console.log(error);
             });
     }
 
@@ -27,7 +27,6 @@ class PollEditor extends React.Component {
         this.unregisterAuthObserver = firebase.auth().onAuthStateChanged(
             (_user) => {
                 this.setState({ user: _user, initializing: false });
-                console.log("user: ", _user);
             }
         );
     }
@@ -40,7 +39,6 @@ class PollEditor extends React.Component {
         let newPoll = this.state.poll;
         newPoll.title = event.target.value;
         this.setState({ poll: newPoll });
-        console.log(this.state.poll);
     }
 
     handleDescriptionChange = (event) => {
@@ -68,7 +66,7 @@ class PollEditor extends React.Component {
     }
 
     handleCreateBtn = () => {
-        firebase.auth().currentUser.getIdToken(true).then(function(token) {
+        firebase.auth().currentUser.getIdToken(false).then((token) => {
             PollService.postPoll(token, this.state.poll).then((response) => {
                 console.log(response.data);
             })

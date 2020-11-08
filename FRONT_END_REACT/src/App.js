@@ -25,7 +25,6 @@ function App() {
   useEffect(() => {
     const subscriber = firebase.auth().onAuthStateChanged(
       (_user) => {
-        console.log("App.js getting a changed state: ", _user);
         setUser(_user);
         setInitializing(false);
       }

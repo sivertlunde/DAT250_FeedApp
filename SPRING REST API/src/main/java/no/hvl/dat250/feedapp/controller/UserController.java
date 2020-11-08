@@ -42,6 +42,7 @@ public class UserController {
 	public ResponseEntity<List<User>> getAllUsers(){
 		try {
 			List<User> users = new ArrayList<User>();
+			userRepository.findAll().forEach(users::add);
 			if (users.isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -66,7 +67,7 @@ public class UserController {
 	public ResponseEntity<User> getUserByUsername(@PathVariable("email") String email, @RequestBody FirebaseToken idToken) throws FirebaseAuthException{
 		boolean checkRevoked = true;
 		FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken.getUid(), checkRevoked);
-		Optional<User> user = userRepository.findByUsername(email);
+		Optional<User> user = userRepository.findByEmail(email);
 		if (user.isPresent() && email == decodedToken.getEmail()) {
 			return new ResponseEntity<>(user.get(), HttpStatus.OK);
 		} else {

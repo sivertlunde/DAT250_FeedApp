@@ -17,7 +17,7 @@ import com.google.firebase.cloud.FirestoreClient;
 
 @Service
 public class FirebaseInitializer {
-	
+		
 	@PostConstruct
 	public void initialize() throws IOException, FirebaseAuthException{
 		FileInputStream serviceAccount = new FileInputStream("./feedapp-56dfe-firebase-adminsdk-isgww-df9eb5fba2.json");
@@ -31,5 +31,9 @@ public class FirebaseInitializer {
 	
 	public Firestore getDatabase() throws IOException {
 		return FirestoreClient.getFirestore();
+	}
+	
+	public FirebaseAuth getAuth() throws IOException {
+		return FirebaseAuth.getInstance();
 	}
 }
