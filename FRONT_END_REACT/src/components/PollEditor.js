@@ -1,6 +1,7 @@
 import React from 'react';
 import PollService from '../services/PollService';
 import firebase from 'firebase';
+import { withRouter } from "react-router";
 
 class PollEditor extends React.Component {
 
@@ -8,6 +9,7 @@ class PollEditor extends React.Component {
         super(props)
         this.state = {
             poll: { title: "", description: "", green: "", red: "", isPublic: true },
+            pollId: null,
             user: null,
             initializing: true
         }
@@ -15,7 +17,10 @@ class PollEditor extends React.Component {
 
     getPollData = (id) => {
         PollService.getPoll(id).then((response) => {
-            this.setState({ poll: response.data })
+            response.status == 200 ?
+            this.setState({ poll: response.data, pollId : id })
+            :
+            console.log(response);
         })
             .catch((error) => {
                 console.log(error);
@@ -23,7 +28,9 @@ class PollEditor extends React.Component {
     }
 
     componentDidMount() {
-        this.props.id ? this.getPollData(this.props.id) : console.log("It's new");
+        const id = this.props.match.params.id; 
+        console.log("ID:", this.props.match.params.id);
+        id ? this.getPollData(id) : console.log("It's new");
         this.unregisterAuthObserver = firebase.auth().onAuthStateChanged(
             (_user) => {
                 this.setState({ user: _user, initializing: false });
@@ -67,6 +74,7 @@ class PollEditor extends React.Component {
 
     handleCreateBtn = () => {
         firebase.auth().currentUser.getIdToken(false).then((token) => {
+            console.log(token);
             PollService.postPoll(token, this.state.poll).then((response) => {
                 console.log(response.data);
             })
@@ -81,6 +89,7 @@ class PollEditor extends React.Component {
 
     handleUpdateBtn = () => {
         firebase.auth().currentUser.getIdToken(true).then(function(token) {
+            console.log(token);
             PollService.putPoll(this.state.id, token, this.state.poll).then((response) => {
                 console.log(response.data);
             })
@@ -103,7 +112,7 @@ class PollEditor extends React.Component {
         if (!this.state.initializing && this.state.user) {
             return (
                 <form>
-                    <h1>{this.props.id ? "Edit Poll" : "New Poll"}</h1>
+                    <h1>{this.state.pollId ? "Edit Poll" : "New Poll"}</h1>
                     Poll title: <p><input type="text" value={this.state.poll.title} onChange={this.handleTitleChange} /></p>
                     Description: <p><input type="textarea" value={this.state.poll.description} onChange={this.handleDescriptionChange} /></p>
                     Option 1: <p><input type="text" value={this.state.poll.green} onChange={this.handleOption1Change} /></p>
@@ -113,7 +122,7 @@ class PollEditor extends React.Component {
                         Public <input type="radio" value="public" name="visibility" checked={this.state.poll.isPublic} onChange={this.handlePublicChange} />
                         Private <input type="radio" value="private" name="visibility" checked={!this.state.poll.isPublic} onChange={this.handlePublicChange} />
                     </div>
-                    {this.props.id ?
+                    {this.state.pollId ?
                         <button onClick={this.handleUpdateBtn}>Update</button>
                     :
                         <button onClick={this.handleCreateBtn}>Create</button>
@@ -130,4 +139,4 @@ class PollEditor extends React.Component {
     }
 }
 
-export default PollEditor;
+export default withRouter(PollEditor);

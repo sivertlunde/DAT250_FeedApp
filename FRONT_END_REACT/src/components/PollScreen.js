@@ -10,12 +10,25 @@ class PollScreen extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            "poll": {},
-            "vote": "",
-            "initializing": true
+            poll: {},
+            pollId: null,
+            vote: "",
+            initializing: true
         }
         this.onValueChange = this.onValueChange.bind(this);
         this.formSubmit = this.handleSubmit.bind(this);    
+    }
+
+    getPollData = (id) => {
+        PollService.getPoll(id).then((response) => {
+            response.status == 200 ?
+            this.setState({ poll: response.data, pollId : id })
+            :
+            console.log(response);
+        })
+            .catch((error) => {
+                console.log(error);
+            })
     }
 
     componentDidMount() {
@@ -26,11 +39,7 @@ class PollScreen extends React.Component {
         );
 
         const id = this.props.match.params.id;
-        PollService.getPoll(id).then((response) => {
-            this.setState({ "poll": response.data })
-        })
-            .catch((error) => {
-            });
+        id ? this.getPollData(id) : console.log("No id given");
     }
 
     handleSubmit = (event) => {
@@ -62,7 +71,7 @@ class PollScreen extends React.Component {
             )
         }
 
-        if (!this.state.intializing && this.state.poll && (this.state.poll.isPublic || this.state.user)) {
+        if (!this.state.intializing && this.state.pollId && (this.state.poll.isPublic || this.state.user)) {
             return (
                 <div>
                     {

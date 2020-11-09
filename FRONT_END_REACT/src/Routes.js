@@ -16,13 +16,16 @@ export default function Routes() {
         <Route path="/login">
             <Login />
         </Route>
-        <Route path="/vote">
+        <Route path="/vote/:id">
             <PollScreen />
         </Route>
-        <Route path="/createPoll">
+        <Route path="/poll/:id">
             <PollEditor />
         </Route>
-        <Route path="/:id">
+        <Route path="/poll">
+            <PollEditor />
+        </Route>
+        <Route path="/vote">
             <PollScreen />
         </Route>
       </Switch>
