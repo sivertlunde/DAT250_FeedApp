@@ -70,7 +70,7 @@ public class VoteController {
 	}
 
 	@PostMapping("/votes")
-	public ResponseEntity<Vote> createVote(@RequestParam(required = false) Long voterId,
+	public ResponseEntity<Vote> createVote(@RequestParam(required = false) String voterId,
 			@RequestParam(required = true) Long pollId, @RequestParam(required = true) Integer vote,
 			@RequestHeader(name = "Authorization", required = true) String token) {
 		try {

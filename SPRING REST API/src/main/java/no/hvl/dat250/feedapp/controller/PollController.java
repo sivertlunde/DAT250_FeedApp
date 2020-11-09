@@ -135,14 +135,15 @@ public class PollController {
 	// @RequestMapping(value = "/polls", method = RequestMethod.POST,
 	// produces = "charset=utf-8; application/json")
 	// @ResponseBody
-	public ResponseEntity<Poll> createPoll(@RequestHeader (name="Authorization") String token, @RequestBody Poll poll, @RequestParam(required = true) Long userId) {
+	public ResponseEntity<Poll> createPoll(@RequestHeader (name="Authorization") String token, @RequestBody Poll poll) {
 		String _token = token.replaceAll("Bearer ", "");
-		if (tokenIsValid(_token)) {
+		FirebaseToken firebasetoken = getValidToken(_token);
+		if (firebasetoken != null) {
 			try {
 				Poll newPoll = new Poll(poll.getTitle(), poll.getDescription(), poll.getGreen(), poll.getRed(),
 						poll.getIsPublic(), null);
-				if (userId != null) {
-					Optional<User> user = userRepository.findById(userId);
+				if (firebasetoken.getUid() != null) {
+					Optional<User> user = userRepository.findById(firebasetoken.getUid());
 					if (user.isPresent()) {
 						newPoll.setCreatedBy(user.get());
 						Poll savedPoll = pollRepository.save(newPoll);
@@ -220,18 +221,15 @@ public class PollController {
 		}
 	}
 	
-	private boolean tokenIsValid(String token) {
+	private FirebaseToken getValidToken(String token) {
 		try {
-			FirebaseToken decodedToken = firebase.getAuth().verifyIdToken(token);
-			String uid = decodedToken.getUid();
-			System.out.println("Returnert fra verifyToken: " + uid);
-			return true;
+			return firebase.getAuth().verifyIdToken(token);
 		} catch (FirebaseAuthException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return false;
+		return null;
 	}
 
 }
