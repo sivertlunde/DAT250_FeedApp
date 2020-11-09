@@ -2,17 +2,17 @@ package no.hvl.dat250.feedapp.service;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Random;
 
 import javax.annotation.PostConstruct;
+
 import org.springframework.stereotype.Service;
+
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.FirebaseToken;
 import com.google.firebase.cloud.FirestoreClient;
 
 @Service

@@ -3,6 +3,7 @@ import PollService from '../services/PollService';
 import VoteService from '../services/VoteService';
 import { useLocation } from 'react-router-dom'
 import { withRouter } from "react-router";
+import firebase from 'firebase';
 
 class PollScreen extends React.Component {
 
@@ -27,11 +28,16 @@ class PollScreen extends React.Component {
 
     handleSubmit = (event) => {
         const id = this.props.match.params.id;
-        event.preventDefault();
-        // denne skal ta bruker som parameter hvis pollen er private. (Fordi du må være logget inn for å stemme).
-        if(this.state.selectedOption) {
-            VoteService.postVote(id, this.state.selectedOption)
-        }
+        firebase.auth().currentUser.getIdToken(false).then((token) => {
+             VoteService.postVote(id, 3, this.state.selectedOption, token);
+         })
+         .catch((error) => {
+             console.log(error);
+         });
+         event.preventDefault();
+        // if(this.state.selectedOption) {
+        //     VoteService.postVote(id, this.state.selectedOption)
+        // }
         console.log(event.target);
     }
 

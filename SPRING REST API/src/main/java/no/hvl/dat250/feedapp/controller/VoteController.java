@@ -1,9 +1,9 @@
 package no.hvl.dat250.feedapp.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +14,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
 
 import no.hvl.dat250.feedapp.model.Poll;
 import no.hvl.dat250.feedapp.model.User;
@@ -23,6 +27,7 @@ import no.hvl.dat250.feedapp.model.Vote;
 import no.hvl.dat250.feedapp.repository.PollRepository;
 import no.hvl.dat250.feedapp.repository.UserRepository;
 import no.hvl.dat250.feedapp.repository.VoteRepository;
+import no.hvl.dat250.feedapp.service.FirebaseInitializer;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -33,6 +38,8 @@ public class VoteController {
 	UserRepository userRepository;
 	@Autowired
 	PollRepository pollRepository;
+	@Autowired
+	FirebaseInitializer firebase;
 
 	@GetMapping("/votes")
 	public ResponseEntity<List<Vote>> getAllVotes(@RequestParam(required = false) String title) {
@@ -64,15 +71,26 @@ public class VoteController {
 
 	@PostMapping("/votes")
 	public ResponseEntity<Vote> createVote(@RequestParam(required = false) Long voterId,
-			@RequestParam(required = true) Long pollId, @RequestParam(required = true) Integer vote) {
+			@RequestParam(required = true) Long pollId, @RequestParam(required = true) Integer vote,
+			@RequestHeader(name = "Authorization", required = true) String token) {
 		try {
 			Vote newVote = new Vote(vote, null, null);
+			System.out.println(voterId);
+			System.out.println(pollId);
+			System.out.println(token);
 			if (voterId != null) {
-				Optional<User> voterById = userRepository.findById(voterId);
-				if (voterById.isPresent()) {
-					newVote.setVoter(voterById.get());
+				String _token = token.replaceAll("Bearer ", "");
+				if (tokenIsValid(_token)) {
+					Optional<User> voterById = userRepository.findById(voterId);
+					if (voterById.isPresent()) {
+						System.out.println("heiii");
+						newVote.setVoter(voterById.get());
+						System.out.println(voterById.get().getEmail());
+					} else {
+						return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+					}
 				} else {
-					return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+					return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 				}
 			}
 
@@ -91,6 +109,7 @@ public class VoteController {
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+
 	}
 
 	@PostMapping("/votes/many")
@@ -98,7 +117,6 @@ public class VoteController {
 			@RequestParam(required = false) String red, @RequestParam(required = false) String green) {
 		try {
 			if (poll != null) {
-
 				int redVotes;
 				int greenVotes;
 				Long pollId;
@@ -170,4 +188,17 @@ public class VoteController {
 
 	}
 
+	private boolean tokenIsValid(String token) {
+		try {
+			FirebaseToken decodedToken = firebase.getAuth().verifyIdToken(token);
+			String uid = decodedToken.getUid();
+			System.out.println("Returnert fra verifyToken: " + uid);
+			return true;
+		} catch (FirebaseAuthException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 }

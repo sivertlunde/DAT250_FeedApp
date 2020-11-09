@@ -1,5 +1,6 @@
 package no.hvl.dat250.feedapp.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,7 +38,7 @@ public class UserController {
 	RoleRepository roleRepository;
 	
 	@Autowired
-	FirebaseInitializer db;
+	FirebaseInitializer firebase;
 
 	@GetMapping("/users")
 	public ResponseEntity<List<User>> getAllUsers(){
@@ -64,25 +66,27 @@ public class UserController {
 	}
 
 	@GetMapping("/users/user/{email}")
-	public ResponseEntity<User> getUserByUsername(@PathVariable("email") String email, @RequestBody FirebaseToken idToken) throws FirebaseAuthException{
-		boolean checkRevoked = true;
-		FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken.getUid(), checkRevoked);
-		Optional<User> user = userRepository.findByEmail(email);
-		if (user.isPresent() && email == decodedToken.getEmail()) {
-			return new ResponseEntity<>(user.get(), HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	public ResponseEntity<User> getUserByUsername(@PathVariable("email") String email, @RequestHeader (name="Authorization") String token){
+		String _token = token.replaceAll("Bearer ", "");
+		if(tokenIsValid(_token)) {
+			Optional<User> user = userRepository.findByEmail(email);
+			if (user.isPresent()) {
+				return new ResponseEntity<>(user.get(), HttpStatus.OK);
+			} else{
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+		}else {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 	}
 
 	@PostMapping(value = "/users", consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<User> createUser(@RequestBody User user, @RequestParam(required = true) Long roleId, @RequestBody FirebaseToken idToken) throws FirebaseAuthException{
+	public ResponseEntity<User> createUser(@RequestBody User user, @RequestParam(required = true) Long roleId) {
 		try {
-			FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken.getUid());
 			User newUser = new User(user.getEmail());
 			if (roleId != null) {
 				Optional<Role> role = roleRepository.findById(roleId);
-				if (role.isPresent() && newUser.getEmail() == decodedToken.getEmail()) {
+				if (role.isPresent()) {
 					newUser.setRole(role.get());
 				}
 			}
@@ -122,6 +126,20 @@ public class UserController {
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	private boolean tokenIsValid(String token) {
+		try {
+			FirebaseToken decodedToken = firebase.getAuth().verifyIdToken(token);
+			String uid = decodedToken.getUid();
+			System.out.println("Returnert fra verifyToken: " + uid);
+			return true;
+		} catch (FirebaseAuthException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 }
