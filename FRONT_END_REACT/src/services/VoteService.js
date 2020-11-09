@@ -9,7 +9,7 @@ class VoteService {
     }
 
     postAnonVote(pollId, vote) {
-        axios.post(VOTES_REST_API_URL+"?pollId="+pollId+"&vote="+vote);
+        return axios.post(VOTES_REST_API_URL, null, {params: {pollId: pollId, vote: vote}});
     }
 
     getVotes(userToken) {

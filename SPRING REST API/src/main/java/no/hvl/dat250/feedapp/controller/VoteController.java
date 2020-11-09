@@ -70,30 +70,10 @@ public class VoteController {
 	}
 
 	@PostMapping("/votes")
-	public ResponseEntity<Vote> createVote(@RequestParam(required = false) String voterId,
-			@RequestParam(required = true) Long pollId, @RequestParam(required = true) Integer vote,
-			@RequestHeader(name = "Authorization", required = true) String token) {
+	public ResponseEntity<Vote> createVote(@RequestParam(required = true) Long pollId, @RequestParam(required = true) Integer vote,
+			@RequestHeader(name = "Authorization", required = false) String token) {
 		try {
 			Vote newVote = new Vote(vote, null, null);
-			System.out.println(voterId);
-			System.out.println(pollId);
-			System.out.println(token);
-			if (voterId != null) {
-				String _token = token.replaceAll("Bearer ", "");
-				if (tokenIsValid(_token)) {
-					Optional<User> voterById = userRepository.findById(voterId);
-					if (voterById.isPresent()) {
-						System.out.println("heiii");
-						newVote.setVoter(voterById.get());
-						System.out.println(voterById.get().getEmail());
-					} else {
-						return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-					}
-				} else {
-					return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-				}
-			}
-
 			if (pollId != null) {
 				Optional<Poll> pollById = pollRepository.findById(pollId);
 				if (pollById.isPresent()) {
@@ -103,6 +83,21 @@ public class VoteController {
 				}
 			} else {
 				return new ResponseEntity<>(null, HttpStatus.NOT_ACCEPTABLE);
+			}
+			
+			if (token != null) {
+				String _token = token.replaceAll("Bearer ", "");
+				FirebaseToken userToken = getValidToken(_token);
+				if (userToken != null) {
+					Optional<User> voterById = userRepository.findById(userToken.getUid());
+					if (voterById.isPresent()) {
+						newVote.setVoter(voterById.get());
+					} 
+				} 
+			}
+
+			if (!newVote.getPoll().getIsPublic() && newVote.getVoter() == null) {
+				return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 			}
 			Vote _vote = voteRepository.save(newVote);
 			return new ResponseEntity<>(_vote, HttpStatus.CREATED);
@@ -188,17 +183,14 @@ public class VoteController {
 
 	}
 
-	private boolean tokenIsValid(String token) {
+	private FirebaseToken getValidToken(String token) {
 		try {
-			FirebaseToken decodedToken = firebase.getAuth().verifyIdToken(token);
-			String uid = decodedToken.getUid();
-			System.out.println("Returnert fra verifyToken: " + uid);
-			return true;
+			return firebase.getAuth().verifyIdToken(token);
 		} catch (FirebaseAuthException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return false;
+		return null;
 	}
 }

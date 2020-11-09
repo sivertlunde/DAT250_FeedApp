@@ -45,7 +45,7 @@ class PollScreen extends React.Component {
     }
 
     handleSubmit = (event) => {
-        if (user) {
+        if (this.state.user) {
             firebase.auth().currentUser.getIdToken(false).then((token) => {
                 VoteService.postVote(this.state.pollId, this.state.selectedOption, token);
             })
@@ -53,7 +53,7 @@ class PollScreen extends React.Component {
                 console.log(error);
             });
         } else {
-            
+            VoteService.postAnonVote(this.state.pollId, this.state.selectedOption);
         }
         
          event.preventDefault();

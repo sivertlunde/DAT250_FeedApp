@@ -41,6 +41,7 @@ class PollComponent extends React.Component {
     getPollsAndVotes = () => {
         firebase.auth().currentUser.getIdToken(false).then((token) => {
             UserService.getMyUser(token).then((response) => {
+                console.log("UserResponse: ",response);
                 this.setState({ polls: response.data.polls, votes: response.data.votes })
             }).catch((error) => {
               console.log(error);
@@ -122,16 +123,19 @@ class PollComponent extends React.Component {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {
+                                    {console.log(this.state.votes)}
+                                        {this.state.votes.length > 0 ?
                                         this.state.votes.map(
                                             vote =>
                                                 <tr key={vote.id}>
                                                     <td> {vote.poll.title}</td>
                                                     <td> {vote.poll.red}</td>
                                                     <td> {vote.poll.green}</td>
-                                                    <td> {vote.result === 1 ? "Green" : "Red"}</td>
+                                                    <td> {vote.result === 1 ? vote.poll.green : vote.poll.red}</td>
                                                 </tr>
                                         )
+                                        :
+                                        <div></div>
                                     }
                                 </tbody>
                             </table>
