@@ -96,7 +96,7 @@ class PollComponent extends React.Component {
                         {/* 
                             Disse to tabellene viser det samme atm.
                         */ }
-                        <div className="col-xs-6 ">
+                        {/*<div className="col-xs-6 ">
                             <h1>Your votes</h1>
                             <table className="table table-striped">
                                 <thead>
@@ -123,7 +123,7 @@ class PollComponent extends React.Component {
                                     }
                                 </tbody>
                             </table>
-                        </div>
+                        </div>*/}
                     </div>
                 </div>
             )
@@ -131,7 +131,7 @@ class PollComponent extends React.Component {
 
         return (
             <div className="container">
-                <CodeInput />
+                <CodeInput props={this.props} />
             </div>
 
         )

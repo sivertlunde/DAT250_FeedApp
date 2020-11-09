@@ -11,13 +11,20 @@ class PollScreen extends React.Component {
         super(props)
         this.state = {
             "poll": {},
-            "vote": ""
+            "vote": "",
+            "initializing": true
         }
         this.onValueChange = this.onValueChange.bind(this);
         this.formSubmit = this.handleSubmit.bind(this);    
     }
 
     componentDidMount() {
+        this.unregisterAuthObserver = firebase.auth().onAuthStateChanged(
+            (_user) => {
+                this.setState({ user: _user, initializing: false });
+            }
+        );
+
         const id = this.props.match.params.id;
         PollService.getPoll(id).then((response) => {
             this.setState({ "poll": response.data })
@@ -35,6 +42,7 @@ class PollScreen extends React.Component {
              console.log(error);
          });
          event.preventDefault();
+        // denne skal ta bruker som parameter hvis pollen er private. (Fordi du må være logget inn for å stemme).
         // if(this.state.selectedOption) {
         //     VoteService.postVote(id, this.state.selectedOption)
         // }
@@ -48,7 +56,13 @@ class PollScreen extends React.Component {
     }
 
     render() {
-        if (this.state.poll) {
+        if (this.state.initializing) {
+            return (
+                <div></div>
+            )
+        }
+
+        if (!this.state.intializing && this.state.poll && (this.state.poll.isPublic || this.state.user)) {
             return (
                 <div>
                     {
@@ -68,6 +82,7 @@ class PollScreen extends React.Component {
         return (
             <div>
                 <h1>Could not find poll #{this.props.match.params.id}</h1>
+                <p>Poll does not exist or you do not have access to this poll. </p>
             </div>
         )
     }

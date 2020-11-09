@@ -15,6 +15,7 @@ const uiConfig = {
     //     // Avoid redirects after sign-in.
     //     signInSuccessWithAuthResult: () => false
     //   },
+    
 
     // We will display email as auth provider.
     signInOptions: [
