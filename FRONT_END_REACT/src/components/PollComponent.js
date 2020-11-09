@@ -1,6 +1,7 @@
 import React from 'react';
 import Cookies from 'universal-cookie';
 import PollService from '../services/PollService';
+import UserService from '../services/UserService';
 import firebase from 'firebase';
 import { withRouter } from "react-router";
 
@@ -32,16 +33,29 @@ class PollComponent extends React.Component {
         super(props)
         this.state = {
             polls: [],
+            votes: [],
             user: null
         };
     }
 
+    getPollsAndVotes = () => {
+        firebase.auth().currentUser.getIdToken(false).then((token) => {
+            UserService.getMyUser(token).then((response) => {
+                this.setState({ polls: response.data.polls, votes: response.data.votes })
+            }).catch((error) => {
+              console.log(error);
+            })
+          }).catch((error) => {
+            console.log(error);
+          })
+    }
+
     componentDidMount() {
-        PollService.getPolls().then((response) => {
-            this.setState({ polls: response.data })
-        });
         this.unregisterAuthObserver = firebase.auth().onAuthStateChanged(
             (_user) => {
+                if(_user) {
+                    this.getPollsAndVotes();
+                }
                 this.setState({ user: _user });
                 console.log("user: ", _user);
                 console.log(cookies);
@@ -70,6 +84,7 @@ class PollComponent extends React.Component {
                             <table className="table table-striped">
                                 <thead>
                                     <tr>
+                                        <td></td>
                                         <td>Title</td>
                                         <td>Description</td>
                                         <td>Start date</td>
@@ -82,48 +97,45 @@ class PollComponent extends React.Component {
                                         this.state.polls.map(
                                             poll =>
                                                 <tr key={poll.id}>
+                                                    <td> <a href={"/poll/" + poll.id}>Edit</a></td>
                                                     <td> {poll.title}</td>
                                                     <td> {poll.description}</td>
                                                     <td> {poll.startDate}</td>
                                                     <td> {poll.endDate}</td>
-                                                    <td> <a href={"/" + poll.id}>Link</a></td>
+                                                    <td> <a href={"/vote/" + poll.id}>Link</a></td>
                                                 </tr>
                                         )
                                     }
                                 </tbody>
                             </table>
                         </div>
-                        {/* 
-                            Disse to tabellene viser det samme atm.
-                        */ }
-                        {/*<div className="col-xs-6 ">
+                        
+                        <div className="col-xs-6 ">
                             <h1>Your votes</h1>
                             <table className="table table-striped">
                                 <thead>
                                     <tr>
-                                        <td>Title</td>
-                                        <td>Description</td>
-                                        <td>Start date</td>
-                                        <td>End date</td>
-                                        <td>Link</td>
+                                        <td>Poll</td>
+                                        <td>Red vote</td>
+                                        <td>Green vote</td>
+                                        <td>Your vote</td>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {
-                                        this.state.polls.map(
-                                            poll =>
-                                                <tr key={poll.id}>
-                                                    <td> {poll.title}</td>
-                                                    <td> {poll.description}</td>
-                                                    <td> {poll.startDate}</td>
-                                                    <td> {poll.endDate}</td>
-                                                    <td> <a href={"/" + poll.id}>Link</a></td>
+                                        this.state.votes.map(
+                                            vote =>
+                                                <tr key={vote.id}>
+                                                    <td> {vote.poll.title}</td>
+                                                    <td> {vote.poll.red}</td>
+                                                    <td> {vote.poll.green}</td>
+                                                    <td> {vote.result === 1 ? "Green" : "Red"}</td>
                                                 </tr>
                                         )
                                     }
                                 </tbody>
                             </table>
-                        </div>*/}
+                        </div>
                     </div>
                 </div>
             )

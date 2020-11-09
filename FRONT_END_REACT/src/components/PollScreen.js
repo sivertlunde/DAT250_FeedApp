@@ -13,6 +13,8 @@ class PollScreen extends React.Component {
             poll: {},
             pollId: null,
             vote: "",
+            selectedOption: "",
+            user: null,
             initializing: true
         }
         this.onValueChange = this.onValueChange.bind(this);
@@ -43,13 +45,17 @@ class PollScreen extends React.Component {
     }
 
     handleSubmit = (event) => {
-        const id = this.props.match.params.id;
-        firebase.auth().currentUser.getIdToken(false).then((token) => {
-             VoteService.postVote(id, 3, this.state.selectedOption, token);
-         })
-         .catch((error) => {
-             console.log(error);
-         });
+        if (user) {
+            firebase.auth().currentUser.getIdToken(false).then((token) => {
+                VoteService.postVote(this.state.pollId, this.state.selectedOption, token);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+        } else {
+            
+        }
+        
          event.preventDefault();
         // denne skal ta bruker som parameter hvis pollen er private. (Fordi du må være logget inn for å stemme).
         // if(this.state.selectedOption) {
@@ -79,8 +85,8 @@ class PollScreen extends React.Component {
                             <h1>{this.state.poll.title}</h1>
                             <p>{this.state.poll.description}</p>
                             <div className="">
-                                <input type="radio" value="0" name="vote" onChange={this.onValueChange} checked={this.state.selectedOption === "0"} /> {this.state.poll.green}
-                                <input type="radio" value="1" name="vote" onChange={this.onValueChange} checked={this.state.selectedOption === "1"} /> {this.state.poll.red}
+                                <input type="radio" value="0" name="vote" onChange={this.onValueChange} checked={this.state.selectedOption === "0"} /> {this.state.poll.red}
+                                <input type="radio" value="1" name="vote" onChange={this.onValueChange} checked={this.state.selectedOption === "1"} /> {this.state.poll.green}
                             </div>
                             <button>Vote</button>
                         </form>

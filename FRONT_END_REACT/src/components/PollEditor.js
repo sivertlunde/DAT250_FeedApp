@@ -88,6 +88,7 @@ class PollEditor extends React.Component {
 
     handleUpdateBtn = () => {
         firebase.auth().currentUser.getIdToken(false).then((token) => {
+            console.log(token);
             PollService.putPoll(this.state.pollId, token, this.state.poll).then((response) => {
                 console.log(response.data);
             })

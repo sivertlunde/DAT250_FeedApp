@@ -3,9 +3,9 @@ import axios from 'axios'
 const VOTES_REST_API_URL = 'http://localhost:8080/votes';
 
 class VoteService {
-    postVote(pollId, userId, vote, userToken) {
+    postVote(pollId, vote, userToken) {
         const header = { Authorization: `Bearer ${userToken}` };
-        return axios.post(VOTES_REST_API_URL, null, {headers: header, params: {pollId: pollId, voterId: userId, vote: vote}});
+        return axios.post(VOTES_REST_API_URL, null, {headers: header, params: {pollId: pollId, vote: vote}});
     }
 
     postAnonVote(pollId, vote) {

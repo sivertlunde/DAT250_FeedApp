@@ -3,6 +3,7 @@ import './App.css';
 import Routes from "./Routes";
 import { useState, useEffect } from 'react';
 import firebase from 'firebase';
+import UserService from './services/UserService';
 
 // Configure Firebase.
 var config = {
@@ -26,6 +27,19 @@ function App() {
   useEffect(() => {
     const subscriber = firebase.auth().onAuthStateChanged(
       (_user) => {
+        if (_user) {
+          firebase.auth().currentUser.getIdToken(false).then((token) => {
+            UserService.getMyUser(token).then((response) => {
+              response.data.role.role === "Admin" ? setIsAdmin(true) : console.log(response);
+            }).catch((error) => {
+              console.log(error);
+            })
+          }).catch((error) => {
+            console.log(error);
+          })
+        } else {
+          setIsAdmin(false);
+        }
         setUser(_user);
         setInitializing(false);
       }
@@ -45,6 +59,11 @@ function App() {
           <a href="/login">Log in</a>
       :
       <div></div>  
+      }
+      {isAdmin ?
+        <a href="/admin">Admin</a>
+      :
+        <div></div>
       }
       <Routes />
     </div>

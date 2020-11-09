@@ -64,6 +64,23 @@ public class UserController {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
+	
+	@GetMapping("/users/me")
+	public ResponseEntity<User> getUserByToken(@RequestHeader (name="Authorization") String token) {
+		String _token = token.replaceAll("Bearer ", "");
+		FirebaseToken userToken = getValidToken(_token);
+		if (userToken != null) {
+			Optional<User> user = userRepository.findById(userToken.getUid());
+			if (user.isPresent()) {
+				return new ResponseEntity<>(user.get(), HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+		} else {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+		
+	}
 
 	@GetMapping("/users/user/{email}")
 	public ResponseEntity<User> getUserByUsername(@PathVariable("email") String email, @RequestHeader (name="Authorization") String token){
