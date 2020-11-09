@@ -55,7 +55,7 @@ public class UserController {
 	}
 
 	@GetMapping("/users/{id}")
-	public ResponseEntity<User> getUserById(@PathVariable("id") Long id) {
+	public ResponseEntity<User> getUserById(@PathVariable("id") String id) {
 		Optional<User> user = userRepository.findById(id);
 		System.out.println(id);
 		if (user.isPresent()) {
@@ -68,7 +68,7 @@ public class UserController {
 	@GetMapping("/users/user/{email}")
 	public ResponseEntity<User> getUserByUsername(@PathVariable("email") String email, @RequestHeader (name="Authorization") String token){
 		String _token = token.replaceAll("Bearer ", "");
-		if(tokenIsValid(_token)) {
+		if(getValidToken(_token) != null) {
 			Optional<User> user = userRepository.findByEmail(email);
 			if (user.isPresent()) {
 				return new ResponseEntity<>(user.get(), HttpStatus.OK);
@@ -80,66 +80,86 @@ public class UserController {
 		}
 	}
 
-	@PostMapping(value = "/users", consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<User> createUser(@RequestBody User user, @RequestParam(required = true) Long roleId) {
-		try {
-			User newUser = new User(user.getEmail());
-			if (roleId != null) {
-				Optional<Role> role = roleRepository.findById(roleId);
-				if (role.isPresent()) {
-					newUser.setRole(role.get());
+	@PostMapping("/users")
+	public ResponseEntity<User> createUser(@RequestHeader (name="Authorization") String token, @RequestParam(required = true) Long roleId) {
+		String _token = token.replaceAll("Bearer ", "");
+		FirebaseToken firebasetoken = getValidToken(_token);
+		if(firebasetoken != null) {
+		
+			try {
+				User newUser = new User(firebasetoken.getUid(), firebasetoken.getEmail());
+				if (roleId != null) {
+					Optional<Role> role = roleRepository.findById(roleId);
+					if (role.isPresent()) {
+						newUser.setRole(role.get());
+					}
 				}
+				User savedUser = userRepository.save(newUser);
+				return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 			}
-			User savedUser = userRepository.save(newUser);
-			return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}else {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 	}
 
 	@PutMapping("/users/{id}")
 	//@RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<User> updateUser(@PathVariable("id") Long id, @RequestBody User user, @RequestParam(required = false) Long roleId) {
-		Optional<User> userData = userRepository.findById(id);
-		if (userData.isPresent()) {
-			User updatedUser = userData.get();
-			if (user.getEmail() != null) {
-				updatedUser.setEmail(user.getEmail());
-			}
-			if (roleId != null) {
-				Optional<Role> role = roleRepository.findById(roleId);
-				if (role.isPresent()) {
-					updatedUser.setRole(role.get());
+	public ResponseEntity<User> updateUser(@RequestHeader (name="Authorization") String token, @PathVariable("id") String id, @RequestParam(required = false) Long roleId) {
+		String _token = token.replaceAll("Bearer ", "");
+		FirebaseToken firebasetoken = getValidToken(_token);
+		if(firebasetoken != null) {
+			Optional<User> userData = userRepository.findById(id);
+			if (userData.isPresent()) {
+				User updatedUser = userData.get();
+				if (firebasetoken.getEmail() != null) {
+					updatedUser.setEmail(firebasetoken.getEmail());
 				}
+				if (roleId != null) {
+					Optional<Role> role = roleRepository.findById(roleId);
+					if (role.isPresent()) {
+						updatedUser.setRole(role.get());
+					}
+				}
+				return new ResponseEntity<>(userRepository.save(updatedUser), HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
-			return new ResponseEntity<>(userRepository.save(updatedUser), HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}else {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
+		
+		
 	}
 
 	@DeleteMapping("/users/{id}")
-	public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") Long id) {
-		try {
-			userRepository.deleteById(id);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	public ResponseEntity<HttpStatus> deleteUser(@RequestHeader (name="Authorization") String token,@PathVariable("id") String id) {
+		String _token = token.replaceAll("Bearer ", "");
+		FirebaseToken firebasetoken = getValidToken(_token);
+		if(firebasetoken != null) {
+			try {
+				firebase.getAuth().deleteUser(id);
+				userRepository.deleteById(id);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			} catch (Exception e) {
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}	
+		}else {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 	}
 	
-	private boolean tokenIsValid(String token) {
+	private FirebaseToken getValidToken(String token) {
 		try {
-			FirebaseToken decodedToken = firebase.getAuth().verifyIdToken(token);
-			String uid = decodedToken.getUid();
-			System.out.println("Returnert fra verifyToken: " + uid);
-			return true;
+			return firebase.getAuth().verifyIdToken(token);
 		} catch (FirebaseAuthException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return false;
+		return null;
 	}
 
 }

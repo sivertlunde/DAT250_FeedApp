@@ -23,8 +23,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 public class User {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+	private String id;
 	private String email;
 	
 	@OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
@@ -42,15 +41,16 @@ public class User {
 	
 	public User() {}
 
-	public User(String email) {
-		this.email = email;
+	public User(String id, String email) {
+		this.id = id;
+		this.email=email;
 	}
 
-	public Long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
