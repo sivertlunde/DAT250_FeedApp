@@ -32,8 +32,8 @@ public class FeedappApplication {
 //			// save a few entities
 //			Role admin = new Role("Admin");
 //			Role registeredUser = new Role("Registered user");
-//			User user1 = new User("username1");
-//			User user2 = new User("username2");
+//			User user1 = new User("someUserId", "email");
+//			User user2 = new User("someOtherUserId", "someOtherEmail");
 //			Poll poll1 = new Poll("First poll", "To test the stuff", "It works", "It doesn't work", true, user1);
 //			Vote vote1 = new Vote(1, user2, poll1);
 //			Vote vote2 = new Vote(1, user1, poll1);
@@ -46,17 +46,6 @@ public class FeedappApplication {
 //			vr.save(vote1);
 //			vr.save(vote2);
 //
-//			// fetch all polls
-//			log.info("Polls found with findAll():");
-//			log.info("-------------------------------");
-//			for (Poll poll : pr.findAll()) {
-//				log.info(poll.toString());
-//				log.info("With votes:");
-//				for (Vote vote : vr.findByPoll(poll)) {
-//					log.info(vote.toString());
-//				}
-//			}
-//			log.info("");
 //		};
 //	}
 	

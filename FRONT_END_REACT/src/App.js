@@ -21,6 +21,7 @@ function App() {
 
   const [user, setUser] = useState();
   const [initializing, setInitializing] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const subscriber = firebase.auth().onAuthStateChanged(

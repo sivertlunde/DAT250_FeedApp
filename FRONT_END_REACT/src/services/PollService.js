@@ -11,15 +11,19 @@ class PollService {
     getPoll(pollId) {
         return axios.get(POLLS_REST_API_URL+'/'+pollId, { validateStatus: false });
     }
-    
+
     //Har lagt inn (userId: 4) for å teste at det funker for meg. Dette skal fjernes
     postPoll(userToken, pollData) {
         const header = { Authorization: `Bearer ${userToken}` };
-        return axios.post(POLLS_REST_API_URL, pollData, {headers: header, params: {userId: 4}});
+        return axios.post(POLLS_REST_API_URL, pollData, {headers: header });
     }
 
     putPoll(pollId, userToken, pollData) {
-        axios.put(POLLS_REST_API_URL+'/'+pollId, {data: pollData}, {headers: { Authorization: `Bearer ${userToken}` }});
+        let _pollId = pollId
+        const header = { Authorization: `Bearer ${userToken}` };
+        const param = { pollId: _pollId };
+        const config = { headers: header, params: param }
+        return axios.put(POLLS_REST_API_URL, pollData, config);
     }
 }
 

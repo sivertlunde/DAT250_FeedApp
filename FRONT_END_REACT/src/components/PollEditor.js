@@ -17,7 +17,7 @@ class PollEditor extends React.Component {
 
     getPollData = (id) => {
         PollService.getPoll(id).then((response) => {
-            response.status == 200 ?
+            response.status === 200 ?
             this.setState({ poll: response.data, pollId : id })
             :
             console.log(response);
@@ -29,7 +29,6 @@ class PollEditor extends React.Component {
 
     componentDidMount() {
         const id = this.props.match.params.id; 
-        console.log("ID:", this.props.match.params.id);
         id ? this.getPollData(id) : console.log("It's new");
         this.unregisterAuthObserver = firebase.auth().onAuthStateChanged(
             (_user) => {
@@ -88,9 +87,8 @@ class PollEditor extends React.Component {
     }
 
     handleUpdateBtn = () => {
-        firebase.auth().currentUser.getIdToken(true).then(function(token) {
-            console.log(token);
-            PollService.putPoll(this.state.id, token, this.state.poll).then((response) => {
+        firebase.auth().currentUser.getIdToken(false).then((token) => {
+            PollService.putPoll(this.state.pollId, token, this.state.poll).then((response) => {
                 console.log(response.data);
             })
             .catch((error) => {

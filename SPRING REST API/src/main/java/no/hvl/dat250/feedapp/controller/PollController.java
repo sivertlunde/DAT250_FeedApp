@@ -137,13 +137,13 @@ public class PollController {
 	// @ResponseBody
 	public ResponseEntity<Poll> createPoll(@RequestHeader (name="Authorization") String token, @RequestBody Poll poll) {
 		String _token = token.replaceAll("Bearer ", "");
-		FirebaseToken firebasetoken = getValidToken(_token);
-		if (firebasetoken != null) {
+		FirebaseToken firebaseToken = getValidToken(_token);
+		if (firebaseToken != null) {
 			try {
 				Poll newPoll = new Poll(poll.getTitle(), poll.getDescription(), poll.getGreen(), poll.getRed(),
 						poll.getIsPublic(), null);
-				if (firebasetoken.getUid() != null) {
-					Optional<User> user = userRepository.findById(firebasetoken.getUid());
+				if (firebaseToken.getUid() != null) {
+					Optional<User> user = userRepository.findById(firebaseToken.getUid());
 					if (user.isPresent()) {
 						newPoll.setCreatedBy(user.get());
 						Poll savedPoll = pollRepository.save(newPoll);
@@ -164,23 +164,32 @@ public class PollController {
 		
 	}
 
-	@PutMapping("/polls/{id}")
-	public ResponseEntity<Poll> updatePoll(@PathVariable("id") long id, @RequestBody Poll poll) {
-		Optional<Poll> pollData = pollRepository.findById(id);
-
-		if (pollData.isPresent()) {
-			Poll _poll = pollData.get();
-			_poll.setTitle(poll.getTitle());
-			_poll.setDescription(poll.getDescription());
-			_poll.setGreen(poll.getGreen());
-			_poll.setRed(poll.getRed());
-			_poll.setIsPublic(poll.getIsPublic());
-			_poll.setCreatedBy(poll.getCreatedBy());
-			_poll.setStartDate(poll.getStartDate());
-			_poll.setEndDate(poll.getEndDate());
-			return new ResponseEntity<>(pollRepository.save(_poll), HttpStatus.OK);
+	@PutMapping("/polls")
+	public ResponseEntity<Poll> updatePoll(@RequestHeader (name="Authorization") String token, @RequestParam(required = true) Long pollId, @RequestBody Poll poll) {
+		String _token = token.replaceAll("Bearer ", "");
+		FirebaseToken firebaseToken = getValidToken(_token);
+		if (firebaseToken != null) {
+			Optional<Poll> pollData = pollRepository.findById(pollId);
+			if (pollData.isPresent()) {
+				Poll _poll = pollData.get();
+				boolean userIsCreator = _poll.getCreatedBy().getId().equals(firebaseToken.getUid());
+				if (userIsCreator) {
+					_poll.setTitle(poll.getTitle());
+					_poll.setDescription(poll.getDescription());
+					_poll.setGreen(poll.getGreen());
+					_poll.setRed(poll.getRed());
+					_poll.setIsPublic(poll.getIsPublic());
+					_poll.setStartDate(poll.getStartDate());
+					_poll.setEndDate(poll.getEndDate());
+					return new ResponseEntity<>(pollRepository.save(_poll), HttpStatus.OK);
+				} else {
+					return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+				}
+			} else {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			} 
 		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 	}
 	
@@ -219,6 +228,15 @@ public class PollController {
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	private boolean userIsAdmin(String uid) {
+		Optional<User> user = userRepository.findById(uid);
+		if (user.isPresent()) {
+			User _user = user.get();
+			return _user.getRole().getRole().equalsIgnoreCase("admin");
+		}
+		return false;
 	}
 	
 	private FirebaseToken getValidToken(String token) {
