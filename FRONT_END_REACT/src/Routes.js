@@ -4,6 +4,7 @@ import PollComponent from './components/PollComponent';
 import Login from './components/Login';
 import PollEditor from './components/PollEditor';
 import PollScreen from './components/PollScreen';
+import PollDisplay from './components/PollDisplay';
 
 
 
@@ -27,6 +28,12 @@ export default function Routes() {
         </Route>
         <Route path="/vote">
             <PollScreen />
+        </Route>
+        <Route path="/display/:id">
+            <PollDisplay />
+        </Route>
+        <Route path="/display/">
+            <PollDisplay />
         </Route>
       </Switch>
     );

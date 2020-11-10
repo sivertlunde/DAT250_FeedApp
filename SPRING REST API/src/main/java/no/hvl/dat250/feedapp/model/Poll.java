@@ -34,11 +34,11 @@ public class Poll {
 	
 	@ManyToOne
 	@JoinColumn(name = "user_id")
-	@JsonIgnoreProperties(value = "polls")
+	@JsonIgnoreProperties(value = "polls", allowSetters = true)
 	private User createdBy;
 	
 	@OneToMany(mappedBy = "poll", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JsonIgnoreProperties(value = "poll")
+	@JsonIgnoreProperties(value = "poll", allowSetters = true)
 	private List<Vote> votes;
 	
 	public Poll() {}

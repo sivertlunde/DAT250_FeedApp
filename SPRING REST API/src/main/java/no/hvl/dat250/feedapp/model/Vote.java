@@ -23,13 +23,13 @@ public class Vote {
 	
 	@ManyToOne
 	@JoinColumn(name = "user_id")
-	@JsonIgnoreProperties(value = "votes")
+	@JsonIgnoreProperties(value = "votes", allowSetters = true)
 	private User voter;
 	
 	
 	@ManyToOne
 	@JoinColumn(name = "poll_id")
-	@JsonIgnoreProperties(value = "votes")
+	@JsonIgnoreProperties(value = "votes", allowSetters = true)
 	private Poll poll;
 	
 	public Vote() {}

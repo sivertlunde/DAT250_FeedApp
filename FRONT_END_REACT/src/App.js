@@ -51,17 +51,17 @@ function App() {
   return (
     <div className="App">
 
-      <a href="/">Polls</a>
+      <a className="App-link" href="/">Polls</a>
       {!initializing ?
         user ?
-          <a href="/" onClick={() => {firebase.auth().signOut();}}>Log out</a>
+          <a className="App-link" href="/" onClick={() => {firebase.auth().signOut();}}>Log out</a>
         :
-          <a href="/login">Log in</a>
+          <a className="App-link" href="/login">Log in</a>
       :
       <div></div>  
       }
       {isAdmin ?
-        <a href="/admin">Admin</a>
+        <a className="App-link" href="/admin">Admin</a>
       :
         <div></div>
       }
