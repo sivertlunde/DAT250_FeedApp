@@ -5,10 +5,12 @@ import Login from './components/Login';
 import PollEditor from './components/PollEditor';
 import PollScreen from './components/PollScreen';
 import PollDisplay from './components/PollDisplay';
+import AdminScreen from "./components/AdminScreen";
 
 
 
-export default function Routes() {
+export default function Routes(props) {
+    console.log("hei fra routes", props, props.isAdmin)
     return (
       <Switch>
         <Route exact path="/">
@@ -34,6 +36,9 @@ export default function Routes() {
         </Route>
         <Route path="/display/">
             <PollDisplay />
+        </Route>
+        <Route path="/admin">
+            <AdminScreen isAdmin={props.isAdmin} />
         </Route>
       </Switch>
     );

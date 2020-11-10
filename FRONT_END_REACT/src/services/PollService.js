@@ -25,6 +25,12 @@ class PollService {
         const config = { headers: header, params: param }
         return axios.put(POLLS_REST_API_URL, pollData, config);
     }
+
+    deletePoll(pollId) {
+        const body = {id: pollId}
+        return axios.delete(POLLS_REST_API_URL+"/"+pollId, {body: body});
+
+    }
 }
 
 export default new PollService();
