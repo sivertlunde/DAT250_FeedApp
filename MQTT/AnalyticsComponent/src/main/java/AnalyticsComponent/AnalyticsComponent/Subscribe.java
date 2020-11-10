@@ -8,9 +8,13 @@ public class Subscribe {
 	  System.out.println("== START SUBSCRIBER ==");
 	  
 	  try {
-		  MqttClient client=new MqttClient("tcp://localhost:1883", MqttClient.generateClientId());
+		  MqttClient client=new MqttClient("tcp://mqtt.flespi.io:1883", MqttClient.generateClientId());
 		  client.setCallback( new CallBack() );
-		  client.connect(); 
+		  MqttConnectOptions options = new MqttConnectOptions();
+			options.setAutomaticReconnect(true);
+			options.setCleanSession(true);
+			options.setUserName("JtDSTndLKkOcSDCUTV9Cw03o5c8rNlUnEo3nz4Z8eB8U4AELjCbEq4Sl7OCKZlVu");
+			client.connect(options);
 		  client.subscribe("iot_data");
 	  }catch(Exception e) {
 		  e.printStackTrace();
