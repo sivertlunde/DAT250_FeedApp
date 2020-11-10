@@ -27,8 +27,8 @@ class PollEditor extends React.Component {
             if (response.status === 200) {
                 this.setState({ poll: response.data, pollId : id });
                 const now = new Date();
-                let endDate;
-                response.data.endDate ? endDate = new Date(response.data.endDate) : endDate = null;
+                response.data.endDate ? this.setState({ datePickerValue: new Date(response.data.endDate) }) : this.setState({ datePickerValue: null });
+                const endDate = this.state.datePickerValue;
                 if (endDate && now > endDate) {
                     this.setState({ isClosed: true })
                 } else {
@@ -103,7 +103,7 @@ class PollEditor extends React.Component {
     handleCloseNow = () => {
         this.setState({ closeNowChecked: !this.state.closeNowChecked})
         let newPoll = this.state.poll;
-        if (this.state.closeNowChecked) {
+        if (!this.state.closeNowChecked) {
             newPoll.endDate = new Date();
             this.setState({ poll: newPoll });
         } else {

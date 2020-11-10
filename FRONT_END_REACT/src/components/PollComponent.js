@@ -108,25 +108,24 @@ class PollComponent extends React.Component {
                                         <td>Status</td>
                                         <td></td>
                                         <td></td>
-                                        <td></td>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {this.state.polls ?
                                         this.state.polls.map(
                                             (poll, index) => {
+                                                return(
                                                 <tr key={poll.id}>
-                                                    {console.log("IS IT HERE??", this.getPollStatus(index))}
                                                     <td> <a href={"/poll/" + poll.id}>Edit</a></td>
                                                     <td> {poll.title}</td>
                                                     <td> {this.getPollStatus(index)}</td>
                                                     <td> <a href={"/vote/" + poll.id}>Vote here</a></td>
                                                     <td> <a href={"/display/" + poll.id}>View poll</a></td>
-                                                    <td> <a href={"/time/" + poll.id}>Open/Close poll</a></td>
                                                 </tr>
+                                                )
                                             })
                                         :
-                                        <div><p>Ingen polls</p></div>
+                                        <div></div>
                                     }
                                 </tbody>
                             </table>
