@@ -17,12 +17,13 @@ class UserService {
         return axios.get(USERS_REST_API_URL+'/me', { validateStatus: false, headers: header });
     }
 
-    postUser(userData) {
-        axios.post(USERS_REST_API_URL, userData);
+    postUser(userToken) {
+        const header = { Authorization: `Bearer ${userToken}` };
+        return axios.post(USERS_REST_API_URL, null, { headers: header });
     }
 
     putUser(id, userData) {
-        axios.put(USERS_REST_API_URL+'/'+id, userData);
+        return axios.put(USERS_REST_API_URL+'/'+id, userData);
     }
 }
 

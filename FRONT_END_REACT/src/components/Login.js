@@ -2,25 +2,37 @@ import React from 'react';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase';
 import auth from 'firebase/firebase-auth';
+import UserService from '../services/UserService';
 
 
 // Configure FirebaseUI.
 const uiConfig = {
     // Popup signin flow rather than redirect flow.
     signInFlow: 'popup',
-    // Redirect to / after sign in is successful. Alternatively you can provide a callbacks.signInSuccess function.
+    //Redirecting to this url if successful login
     signInSuccessUrl: '/',
-
-    // callbacks: {
-    //     // Avoid redirects after sign-in.
-    //     signInSuccessWithAuthResult: () => false
-    //   },
-    
-
     // We will display email as auth provider.
     signInOptions: [
         firebase.auth.EmailAuthProvider.PROVIDER_ID
-    ]
+    ],
+    //Adding callback for successful login
+    callbacks: {
+        signInSuccessWithAuthResult: (auth, redirectUrl) => {
+            const isNew = auth.additionalUserInfo.isNewUser;
+            if (isNew) {
+                firebase.auth().currentUser.getIdToken(false).then((token) => {
+                    UserService.postUser(token).then((response) => {
+                        console.log(response);
+                    }).catch((error) => {
+                        console.log(error);
+                    })
+                }).catch((error) => {
+                    console.log(error);
+                })
+            }
+            return true; 
+        }
+      }
 };
 
 class Login extends React.Component {

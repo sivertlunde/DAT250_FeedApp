@@ -98,7 +98,7 @@ public class UserController {
 	}
 
 	@PostMapping("/users")
-	public ResponseEntity<User> createUser(@RequestHeader (name="Authorization") String token, @RequestParam(required = true) Long roleId) {
+	public ResponseEntity<User> createUser(@RequestHeader (name="Authorization") String token, @RequestParam(required = false) Long roleId) {
 		String _token = token.replaceAll("Bearer ", "");
 		FirebaseToken firebasetoken = getValidToken(_token);
 		if(firebasetoken != null) {

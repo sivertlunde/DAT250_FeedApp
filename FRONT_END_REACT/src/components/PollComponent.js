@@ -94,7 +94,7 @@ class PollComponent extends React.Component {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {
+                                    {this.state.polls ?
                                         this.state.polls.map(
                                             poll =>
                                                 <tr key={poll.id}>
@@ -106,6 +106,8 @@ class PollComponent extends React.Component {
                                                     <td> <a href={"/vote/" + poll.id}>Link</a></td>
                                                 </tr>
                                         )
+                                        :
+                                        <div></div>
                                     }
                                 </tbody>
                             </table>
@@ -124,7 +126,7 @@ class PollComponent extends React.Component {
                                 </thead>
                                 <tbody>
                                     {console.log(this.state.votes)}
-                                        {this.state.votes.length > 0 ?
+                                        {this.state.votes ?
                                         this.state.votes.map(
                                             vote =>
                                                 <tr key={vote.id}>
