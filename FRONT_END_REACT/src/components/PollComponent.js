@@ -43,6 +43,7 @@ class PollComponent extends React.Component {
             UserService.getMyUser(token).then((response) => {
                 console.log("UserResponse: ",response);
                 this.setState({ polls: response.data.polls, votes: response.data.votes })
+                console.log(this.state.polls);
             }).catch((error) => {
               console.log(error);
             })
@@ -68,6 +69,23 @@ class PollComponent extends React.Component {
         this.unregisterAuthObserver();
     }
 
+    
+
+    getPollStatus = (index) => {
+        let now = new Date();
+        let endDate;
+        this.state.polls[index].endDate ? endDate = new Date(this.state.polls[index].endDate) : endDate = null;
+        if (!this.state.polls[index].startDate) {
+            return "Created";
+        } else if (!endDate) {
+            return "Started";
+        } else if (now > endDate) {
+            return "Closed";
+        } else {
+            return "Ending \n" + endDate.toLocaleString();
+        }
+    }
+
     render() {
         console.log("currentuser:", firebase.auth().currentUser);
         console.log("cookie: ", cookies.get("user"));
@@ -87,27 +105,28 @@ class PollComponent extends React.Component {
                                     <tr>
                                         <td></td>
                                         <td>Title</td>
-                                        <td>Description</td>
-                                        <td>Start date</td>
-                                        <td>End date</td>
-                                        <td>Link</td>
+                                        <td>Status</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {this.state.polls ?
                                         this.state.polls.map(
-                                            poll =>
+                                            (poll, index) => {
                                                 <tr key={poll.id}>
+                                                    {console.log("IS IT HERE??", this.getPollStatus(index))}
                                                     <td> <a href={"/poll/" + poll.id}>Edit</a></td>
                                                     <td> {poll.title}</td>
-                                                    <td> {poll.description}</td>
-                                                    <td> {poll.startDate}</td>
-                                                    <td> {poll.endDate}</td>
-                                                    <td> <a href={"/vote/" + poll.id}>Link</a></td>
+                                                    <td> {this.getPollStatus(index)}</td>
+                                                    <td> <a href={"/vote/" + poll.id}>Vote here</a></td>
+                                                    <td> <a href={"/display/" + poll.id}>View poll</a></td>
+                                                    <td> <a href={"/time/" + poll.id}>Open/Close poll</a></td>
                                                 </tr>
-                                        )
+                                            })
                                         :
-                                        <div></div>
+                                        <div><p>Ingen polls</p></div>
                                     }
                                 </tbody>
                             </table>

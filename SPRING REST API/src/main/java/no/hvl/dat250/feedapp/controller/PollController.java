@@ -142,6 +142,15 @@ public class PollController {
 			try {
 				Poll newPoll = new Poll(poll.getTitle(), poll.getDescription(), poll.getGreen(), poll.getRed(),
 						poll.getIsPublic(), null);
+				if(poll.getStartDate() != null) {
+					Date now = new Date(System.currentTimeMillis());
+					newPoll.setStartDate(now);
+					if (poll.getEndDate() != null) {
+						Date endDate = poll.getEndDate();
+						newPoll.setEndDate(endDate);
+					}
+				}
+				
 				if (firebaseToken.getUid() != null) {
 					Optional<User> user = userRepository.findById(firebaseToken.getUid());
 					if (user.isPresent()) {
@@ -166,6 +175,7 @@ public class PollController {
 
 	@PutMapping("/polls")
 	public ResponseEntity<Poll> updatePoll(@RequestHeader (name="Authorization") String token, @RequestParam(required = true) Long pollId, @RequestBody Poll poll) {
+		System.out.println(poll);
 		String _token = token.replaceAll("Bearer ", "");
 		FirebaseToken firebaseToken = getValidToken(_token);
 		if (firebaseToken != null) {

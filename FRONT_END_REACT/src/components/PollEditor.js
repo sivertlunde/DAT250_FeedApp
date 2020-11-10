@@ -2,24 +2,39 @@ import React from 'react';
 import PollService from '../services/PollService';
 import firebase from 'firebase';
 import { withRouter } from "react-router";
+import DateTimePicker from 'react-datetime-picker';
 
 class PollEditor extends React.Component {
 
     constructor(props) {
         super(props)
         this.state = {
-            poll: { title: "", description: "", green: "", red: "", isPublic: true },
+            poll: { title: "", description: "", green: "", red: "", isPublic: true, startDate: "", endDate: "" },
             pollId: null,
             user: null,
+            started: false,
+            isClosed: false,
+            openNowChecked: false,
+            closeNowChecked: false,
+            datePickerValue: null,
+            storedEndDate: "",
             initializing: true
         }
     }
 
     getPollData = (id) => {
         PollService.getPoll(id).then((response) => {
-            response.status === 200 ?
-            this.setState({ poll: response.data, pollId : id })
-            :
+            if (response.status === 200) {
+                this.setState({ poll: response.data, pollId : id });
+                const now = new Date();
+                let endDate;
+                response.data.endDate ? endDate = new Date(response.data.endDate) : endDate = null;
+                if (endDate && now > endDate) {
+                    this.setState({ isClosed: true })
+                } else {
+                    response.data.startDate ? this.setState({ started: true, storedEndDate: response.data.endDate }) : this.setState({ started: false });
+                }
+            }
             console.log(response);
         })
             .catch((error) => {
@@ -71,7 +86,45 @@ class PollEditor extends React.Component {
         this.setState({ poll: newPoll });
     }
 
+    handleStartNow = () => {
+        this.setState({ openNowChecked: !this.state.openNowChecked})
+        let newPoll = this.state.poll;
+        if (!this.state.openNowChecked) {
+            newPoll.startDate = new Date().toISOString();
+            console.log("New Poll", newPoll);
+            this.setState({ poll: newPoll });
+        } else {
+            newPoll.startDate = "";
+            newPoll.endDate = "";
+            this.setState({ poll: newPoll });
+        }
+    }
+
+    handleCloseNow = () => {
+        this.setState({ closeNowChecked: !this.state.closeNowChecked})
+        let newPoll = this.state.poll;
+        if (this.state.closeNowChecked) {
+            newPoll.endDate = new Date();
+            this.setState({ poll: newPoll });
+        } else {
+            newPoll.endDate = this.state.storedEndDate;
+            this.setState({ poll: newPoll });
+        }
+        
+    }
+
+    handleChangeEndTime = (newDate) => {
+        let endDate = new Date(newDate);
+        this.setState({ datePickerValue: endDate})
+        console.log(endDate);
+        let newPoll = this.state.poll;
+        newPoll.endDate = endDate.toISOString();
+        console.log(newPoll);
+        this.setState({ poll: newPoll });
+    }
+
     handleCreateBtn = () => {
+        console.log(this.state.poll);
         firebase.auth().currentUser.getIdToken(false).then((token) => {
             console.log(token);
             PollService.postPoll(token, this.state.poll).then((response) => {
@@ -87,6 +140,7 @@ class PollEditor extends React.Component {
     }
 
     handleUpdateBtn = () => {
+        console.log("Poll before update: ",this.state.poll.startDate);
         firebase.auth().currentUser.getIdToken(false).then((token) => {
             console.log(token);
             PollService.putPoll(this.state.pollId, token, this.state.poll).then((response) => {
@@ -108,7 +162,13 @@ class PollEditor extends React.Component {
             )
         }
 
-        if (!this.state.initializing && this.state.user) {
+        if (this.state.isClosed) {
+            return(
+                <div><p>This poll is closed.</p></div>
+            )
+        }
+
+        if (!this.state.initializing && this.state.user && !this.state.isClosed) {
             return (
                 <form>
                     <h1>{this.state.pollId ? "Edit Poll" : "New Poll"}</h1>
@@ -121,6 +181,25 @@ class PollEditor extends React.Component {
                         Public <input type="radio" value="public" name="visibility" checked={this.state.poll.isPublic} onChange={this.handlePublicChange} />
                         Private <input type="radio" value="private" name="visibility" checked={!this.state.poll.isPublic} onChange={this.handlePublicChange} />
                     </div>
+                    {this.state.started ? 
+                        <div>
+                            <p>Close poll now <input type="checkbox" name="closeNow" checked={this.state.closeNowChecked} onChange={this.handleCloseNow}/></p>
+                                {this.state.closeNowChecked ? 
+                                    <div></div> 
+                                :
+                                    <div><p>Schedule time for closing poll (optional): </p><DateTimePicker onChange={this.handleChangeEndTime} value={this.state.datePickerValue}/></div>
+                                } 
+                        </div>
+                    : 
+                        <div>
+                            <p>Open poll now <input type="checkbox" name="openNow" checked={this.state.openNowChecked} onChange={this.handleStartNow}/></p>
+                                {this.state.openNowChecked ? 
+                                    <div><p>Schedule time for closing poll (optional): </p><DateTimePicker onChange={this.handleChangeEndTime} value={this.state.datePickerValue}/></div>
+                                :
+                                    <div></div>
+                                } 
+                        </div>  
+                    }
                     {this.state.pollId ?
                         <button onClick={this.handleUpdateBtn}>Update</button>
                     :
