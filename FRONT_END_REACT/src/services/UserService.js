@@ -25,6 +25,11 @@ class UserService {
     putUser(id, userData) {
         return axios.put(USERS_REST_API_URL+'/'+id, userData);
     }
+
+    deleteUser(id, userToken) {
+        const header = { Authorization: `Bearer ${userToken}` };
+        return axios.delete(USERS_REST_API_URL+'/'+id, { headers: header});
+    }
 }
 
 export default new UserService();

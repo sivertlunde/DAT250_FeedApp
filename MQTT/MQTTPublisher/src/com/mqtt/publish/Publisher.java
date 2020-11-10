@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONObject;
 
@@ -44,8 +45,12 @@ public class Publisher {
 	            			URL url2 = new URL("http://localhost:8080/polls/result/"+newlist.get(i));
 	        	            HttpURLConnection con2 = (HttpURLConnection) url2.openConnection();
 	        	            messageString = HelperClass.getFullStringResponse(con2);
-		        			MqttClient client = new MqttClient("tcp://localhost:1883", MqttClient.generateClientId());
-		        			client.connect();
+		        			MqttClient client = new MqttClient("tcp://mqtt.flespi.io:1883", MqttClient.generateClientId());
+		        			MqttConnectOptions options = new MqttConnectOptions();
+		        			options.setAutomaticReconnect(true);
+		        			options.setCleanSession(true);
+		        			options.setUserName("JtDSTndLKkOcSDCUTV9Cw03o5c8rNlUnEo3nz4Z8eB8U4AELjCbEq4Sl7OCKZlVu");
+		        			client.connect(options);
 		        			MqttMessage message = new MqttMessage();
 		        			
 		        			message.setPayload(messageString.getBytes());

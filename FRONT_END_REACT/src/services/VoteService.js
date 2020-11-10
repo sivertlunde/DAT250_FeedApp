@@ -16,6 +16,16 @@ class VoteService {
         const header = { Authorization: `Bearer ${userToken}` };
         return axios.get(VOTES_REST_API_URL, { headers: header });
     }
+
+    getVote(id) {
+        const body = {id: id}
+        return axios.get(VOTES_REST_API_URL, {body: body})
+    }
+
+    deleteVote(voteId) {
+        const body = {id: voteId}
+        return axios.delete(VOTES_REST_API_URL+"/"+voteId, {body: body});
+    }
 }
 
 export default new VoteService();
