@@ -9,13 +9,14 @@ import firebase from 'firebase';
 class AdminScreen extends React.Component {
 
     constructor(props) {
+        
         super(props);
         console.log("from admin screen", props.isAdmin);
         this.state = {
             polls: [],
             votes: [],
             users: [],
-            isAdmin: false
+            isAdmin: props.isAdmin
         };
     }
 
@@ -34,15 +35,15 @@ class AdminScreen extends React.Component {
     }
 
     componentDidMount() {
-        firebase.auth().currentUser.getIdToken(false).then((token) => {
-            UserService.getMyUser(token).then((response) => {
-                response.data.role.role === "Admin" ? this.setState({isAdmin: true}) : console.log(response);
-            }).catch((error) => {
-                console.log(error);
-            })
-        }).catch((error) => {
-            console.log(error);
-        })
+        // firebase.auth().currentUser.getIdToken(false).then((token) => {
+        //     UserService.getMyUser(token).then((response) => {
+        //         response.data.role.role === "Admin" ? this.setState({isAdmin: true}) : console.log(response);
+        //     }).catch((error) => {
+        //         console.log(error);
+        //     })
+        // }).catch((error) => {
+        //     console.log(error);
+        // })
         this.getAllData();
     }
 
@@ -138,7 +139,7 @@ class AdminScreen extends React.Component {
                                                 vote =>
                                                     <tr key={vote.id}>
                                                         <td> {vote.poll.title}</td>
-                                                        <td> {vote.voter.email}</td>
+                                                        <td> {() => vote.voter? vote.voter.email : ""}</td>
                                                         <td> {vote.result === 1 ? vote.poll.green : vote.poll.red}</td>
                                                         <td> <a id={vote.id} href={""} onClick={this.handleVoteDelete}>Delete</a></td>
                                                     </tr>
